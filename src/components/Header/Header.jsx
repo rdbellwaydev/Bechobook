@@ -9,26 +9,26 @@ const Header = () => {
           <div className="">
             <h1>
               <span>Ind</span>
-              <i className="ri-arrow-down-s-line"></i>
+              {/* <i className="ri-arrow-down-s-line"></i> */}
             </h1>
           </div>
-
           <ul className="flex gap-10">
-            <Link>
+            <Link to='/wishlist'>
               <span className="mr-1 hidden sm:inline"> Wishlist</span>
               <i className="ri-poker-hearts-fill"></i>
             </Link>
-            <Link>
+            <Link to='/profile'>
               <span className="mr-1 hidden sm:inline">My Account</span>
               <i className="ri-user-3-fill"></i>
             </Link>
-            <Link>
+            <Link to={'/get-in-touch'}>
               <span className="mr-1 hidden sm:inline">Contact Us</span>
               <i className="ri-phone-fill"></i>
             </Link>
-            <Link>
-              <span className="mr-1 hidden sm:inline">Checkout</span>
-              <i className="ri-shopping-bag-2-fill"></i>
+            <Link to='/cart'>
+              <span className="mr-1 hidden sm:inline">Cart</span>
+              {/* <i className="ri-shopping-bag-2-fill"></i> */}
+              <i className="ri-shopping-cart-fill"></i>
             </Link>
           </ul>
         </div>

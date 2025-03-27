@@ -3,6 +3,7 @@ import "remixicon/fonts/remixicon.css";
 import Header from "../components/Header/Header";
 import Nav from "../components/Header/Nav";
 import Banner1 from "../components/Home/Banner1";
+import { useEffect } from "react";
 import Card from "../components/Home/Card";
 import { useState } from "react";
 import Video from "../components/Home/Video";
@@ -14,12 +15,25 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
+import { Link } from "react-router-dom";
 import ProductCardWeb from "../components/Product/ProductCardWeb";
 import ProductCard3 from "../components/Product/ProductCard3";
 import ProductCard4 from "../components/Product/ProductCard4";
 import Footer2 from "../components/Footer/Footer2";
 import Blog from "../components/Blog/Blog";
+import { useNavigate } from "react-router-dom";
+import Image1 from "../assets/Home/image2.png"
+import Image2 from "../assets/Home/image 9.png"
+import Image3 from "../assets/Home/image 12.png"
+import axios from "axios";
+import Slider from "react-slick";
+import Swal from "sweetalert2";
+import { useAuth } from "../components/Authentication/AuthContext";
+import { useCart } from "../components/CartContext";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 const Home = () => {
+  const navigate = useNavigate();
   const cardDetails = [
     {
       svg: (
@@ -101,214 +115,415 @@ const Home = () => {
       desc: "Order Over $500",
     },
   ];
+  const [categories, setCategories] = useState([]);
+  const [products, setProducts] = useState({
+    "Featured Products": [],
+    "New Arrivals": [],
+    "Most Viewed": [],
+  });
 
-  const products = {
-    "Featured Products": [
-      {
-        id: 1,
-        img: `src/assets/Home/449dec675b9507acd4b0da8e1c64de66.png`,
-        title: `Anthrplogie AmerndeneFranz`,
-        desc: `Amazona`,
-        currentprice: `$ 11.90`,
-        mrp: `$19.99`,
-        discount: `50% OFF`,
-      },
-      {
-        id: 2,
-        img: `src/assets/Home/image.png`,
-        title: `Anthrplogie AmerndeneFranz`,
-        desc: `Amazona`,
-        currentprice: `$ 11.90`,
-        mrp: `$19.99`,
-        discount: `50% OFF`,
-      },
-      {
-        id: 3,
-        img: `src/assets/Home/449dec675b9507acd4b0da8e1c64de66.png`,
-        title: `Anthrplogie AmerndeneFranz`,
-        desc: `Amazona`,
-        currentprice: `$ 11.90`,
-        mrp: `$19.99`,
-        discount: `50% OFF`,
-      },
-      {
-        id: 4,
-        img: `src/assets/Home/image.png`,
-        title: `Anthrplogie AmerndeneFranz`,
-        desc: `Amazona`,
-        currentprice: `$ 11.90`,
-        mrp: `$19.99`,
-        discount: `50% OFF`,
-      },
-      {
-        id: 5,
-        img: `src/assets/Home/image.png`,
-        title: `Anthrplogie AmerndeneFranz`,
-        desc: `Amazona`,
-        currentprice: `$ 11.90`,
-        mrp: `$19.99`,
-        discount: `50% OFF`,
-      },
-      {
-        id: 6,
-        img: `src/assets/Home/103f9e7351e74b8cedbb4739fb3420a7.png`,
-        title: `Anthrplogie AmerndeneFranz`,
-        desc: `Amazona`,
-        currentprice: `$ 11.90`,
-        mrp: `$19.99`,
-        discount: `50% OFF`,
-      },
-    ],
-    "New Arrivals": [
-      {
-        id: 1,
-        img: `src/assets/Home/449dec675b9507acd4b0da8e1c64de66.png`,
-        title: `Anthrplogie AmerndeneFranz`,
-        desc: `Amazona`,
-        currentprice: `$ 11.90`,
-        mrp: `$19.99`,
-        discount: `50% OFF`,
-      },
-      {
-        id: 2,
-        img: `src/assets/Home/image.png`,
-        title: `Anthrplogie AmerndeneFranz`,
-        desc: `Amazona`,
-        currentprice: `$ 11.90`,
-        mrp: `$19.99`,
-        discount: `50% OFF`,
-      },
-      {
-        id: 3,
-        img: `src/assets/Home/d5a528554274b8c5ae0a3869bdc94f79.png`,
-        title: `Anthrplogie AmerndeneFranz`,
-        desc: `Amazona`,
-        currentprice: `$ 11.90`,
-        mrp: `$19.99`,
-        discount: `50% OFF`,
-      },
-      {
-        id: 4,
-        img: `src/assets/Home/a24d640e19f284bea71be4f8fd0a8c47.png`,
-        title: `Anthrplogie AmerndeneFranz`,
-        desc: `Amazona`,
-        currentprice: `$ 11.90`,
-        mrp: `$19.99`,
-        discount: `50% OFF`,
-      },
-    ],
-    "Most Viewed": [
-      {
-        id: 1,
-        img: `src/assets/Home/image.png`,
-        title: `Anthrplogie AmerndeneFranz`,
-        desc: `Amazona`,
-        currentprice: `$ 11.90`,
-        mrp: `$19.99`,
-        discount: `50% OFF`,
-      },
+  const [activeCategory, setActiveCategory] = useState("Featured Products"); // Default tab
+  const [products1, setProducts1] = useState([]);
+  const [books, setBooks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [visibleCount, setVisibleCount] = useState(10);
+  const [leftBanner, setLeftBanner] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+  const [rightBanner, setRightBanner] = useState(null);
+  const { authToken } = useAuth();
+  const { cartItems, setCartItems } = useCart();
+  const categoryMap = {
+    "Featured Products": "featured",
+    "New Arrivals": "new_arrivals",
+    "Most Viewed": "most_viewed",
+  };
+  useEffect(() => {
+    const fetchCartData = async () => {
+      if (!authToken) {
+        console.warn("Auth Token is missing!");
+        return;
+      }
+  
+      console.log("Fetching cart data...");
+  
+      setLoading(true); // ✅ Set loading before fetching
+  
+      try {
+        const response = await fetch(
+          `https://bb.bechobookscan.com/api/getCart?page=${currentPage}`,
+          {
+            headers: { Authorization: `Bearer ${authToken}` },
+          }
+        );
+  
+        console.log("API Response Status:", response.status);
+  
+        if (!response.ok) {
+          throw new Error("Failed to fetch cart data");
+        }
+  
+        const data = await response.json();
+        console.log("Cart Data:", data); // ✅ Debugging log
+  
+        // ✅ Ensure valid data before updating state
+        setCartItems(data.data || []);
+        setTotalPrice(data.total_price ?? 0);
+        setTotalPages(data.pagination?.last_page ?? 1);
+      } catch (error) {
+        console.error("Error fetching cart data:", error);
+      } finally {
+        setLoading(false); // ✅ Always stop loading
+      }
+    };
+  
+    fetchCartData();
+  }, [authToken, currentPage]);
+  useEffect(() => {
+    const fetchBooks = async () => {
+      try {
+        const response = await fetch(
+          `https://bb.bechobookscan.com/api/getBooksByCatalog?catalogs=${categoryMap[activeCategory]}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
-      {
-        id: 2,
-        img: `src/assets/Home/449dec675b9507acd4b0da8e1c64de66.png`,
-        title: `Anthrplogie AmerndeneFranz`,
-        desc: `Amazona`,
-        currentprice: `$ 11.90`,
-        mrp: `$19.99`,
-        discount: `50% OFF`,
+        const data = await response.json();
+        if (data.status && data.data.length > 0) {
+          const categorizedBooks = data.data.map((item) => ({
+            id: item.id,
+            img: item.book.image,
+            title: item.book.title,
+            desc: item.book.synopsis || "No description available",
+            currentprice: `$${item.price}`,
+            mrp: `$${item.mrp}`,
+            discount: `${item.discount}% OFF`,
+          }));
+
+          setProducts((prev) => ({
+            ...prev,
+            [activeCategory]: categorizedBooks,
+          }));
+        }
+      } catch (error) {
+        console.error("Error fetching books:", error);
+      }
+    };
+
+    fetchBooks();
+  }, [activeCategory]); // Fetch data when activeCategory changes
+  useEffect(() => {
+    // Fetch categories from API
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch("https://bb.bechobookscan.com/api/getCategory");
+        const data = await response.json();
+        if (data.status) {
+          setCategories(data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+    fetchCategories();
+  }, []);
+  const NextArrow = ({ onClick }) => (
+    <div className="absolute top-1/2 right-0 transform -translate-y-1/2 z-20 cursor-pointer bg-white shadow-md p-2 rounded-full" onClick={onClick}>
+      <i className="ri-arrow-right-s-line text-2xl text-gray-700 hover:text-gray-900"></i>
+    </div>
+  );
+
+  const PrevArrow = ({ onClick }) => (
+    <div className="absolute top-1/2 left-0 transform -translate-y-1/2 z-20 cursor-pointer bg-white shadow-md p-2 rounded-full" onClick={onClick}>
+      <i className="ri-arrow-left-s-line text-2xl text-gray-700 hover:text-gray-900"></i>
+    </div>
+  );
+  // const settings = {
+  //   dots: false,
+  //   infinite: true,
+  //   speed: 500,
+  //   slidesToShow: 5,
+  //   slidesToScroll: 1,
+  //   nextArrow: <NextArrow />,
+  //   prevArrow: <PrevArrow />,
+  //   responsive: [
+  //     { breakpoint: 1024, settings: { slidesToShow: 4 } },
+  //     { breakpoint: 768, settings: { slidesToShow: 3 } },
+  //     { breakpoint: 480, settings: { slidesToShow: 4 } },
+  //   ],
+  // };
+  const settings = {
+    dots: false,
+    infinite: true, 
+    speed: 500,
+    slidesToShow: 5, // Default for desktop
+    slidesToScroll: 4, // Scroll 4 items at a time
+    swipe: true, // Enable touch swipe
+    touchMove: true, // Allow smooth scrolling
+    nextArrow: window.innerWidth > 768 ? <NextArrow /> : null,
+    prevArrow: window.innerWidth > 768 ? <PrevArrow /> : null,
+    responsive: [
+      { 
+        breakpoint: 1024, 
+        settings: { slidesToShow: 4, slidesToScroll: 4 } // Scroll 4 per swipe
       },
-      {
-        id: 3,
-        img: `src/assets/Home/a24d640e19f284bea71be4f8fd0a8c47.png`,
-        title: `Anthrplogie AmerndeneFranz`,
-        desc: `Amazona`,
-        currentprice: `$ 11.90`,
-        mrp: `$19.99`,
-        discount: `50% OFF`,
+      { 
+        breakpoint: 768, 
+        settings: { 
+          slidesToShow: 4, 
+          slidesToScroll: 4, // Move 4 at a time on swipe
+          nextArrow: null,
+          prevArrow: null, // Hide arrows on mobile
+          swipe: true,
+          touchMove: true,
+          variableWidth: false, // Keep fixed width for equal spacing
+          centerMode: false, // No centering, just smooth swiping
+        } 
+      },
+      { 
+        breakpoint: 480, 
+        settings: { 
+          slidesToShow: 3, // Show 3 slides at a time
+          slidesToScroll: 3, // Move 3 per swipe
+          nextArrow: null,
+          prevArrow: null, // Hide arrows
+          swipe: true,
+          touchMove: true,
+          variableWidth: false, // Even spacing
+          centerMode: false, // Disable centering
+        } 
       },
     ],
   };
+  
+  useEffect(() => {
+    const fetchBanners = async () => {
+      try {
+        // Fetch Left Banner
+        const leftResponse = await axios.get(
+          "https://bb.bechobookscan.com/api/getLeftBanner"
+        );
+        if (leftResponse.data.status && leftResponse.data.data.length > 0) {
+          setLeftBanner(leftResponse.data.data[0].image);
+        }
 
-  const dealOfTheDay = [
-    {
-      id: 1,
-      img: `src/assets/Home/449dec675b9507acd4b0da8e1c64de66.png`,
-      title: `Anthrplogie AmerndeneFranz`,
-      desc: `Amazona`,
-      currentprice: `$ 11.90`,
-      mrp: `$19.99`,
-      discount: `50% OFF`,
-    },
-    {
-      id: 1,
-      img: `src/assets/Home/449dec675b9507acd4b0da8e1c64de66.png`,
-      title: `Anthrplogie AmerndeneFranz`,
-      desc: `Amazona`,
-      currentprice: `$ 11.90`,
-      mrp: `$19.99`,
-      discount: `50% OFF`,
-    },
-    {
-      id: 1,
-      img: `src/assets/Home/103f9e7351e74b8cedbb4739fb3420a7.png`,
-      title: `Anthrplogie AmerndeneFranz`,
-      desc: `Amazona`,
-      currentprice: `$ 11.90`,
-      mrp: `$19.99`,
-      discount: `50% OFF`,
-    },
-    {
-      id: 1,
-      img: `src/assets/Home/449dec675b9507acd4b0da8e1c64de66.png`,
-      title: `Anthrplogie AmerndeneFranz`,
-      desc: `Amazona`,
-      currentprice: `$ 11.90`,
-      mrp: `$19.99`,
-      discount: `50% OFF`,
-    },
-  ];
+        // Fetch Right Banner
+        const rightResponse = await axios.get(
+          "https://bb.bechobookscan.com/api/getRightBanner"
+        );
+        if (rightResponse.data.status && rightResponse.data.data.length > 0) {
+          setRightBanner(rightResponse.data.data[0].image);
+        }
+      } catch (error) {
+        console.error("Error fetching banners:", error);
+      }
+    };
 
-  const bestSellers = [
-    {
-      id: 1,
-      img: `src/assets/Home/449dec675b9507acd4b0da8e1c64de66.png`,
-      title: `Anthrplogie AmerndeneFranz`,
-      desc: `Amazona`,
-      currentprice: `$ 11.90`,
-      mrp: `$19.99`,
-      discount: `50% OFF`,
-    },
-    {
-      id: 2,
-      img: `src/assets/Home/a24d640e19f284bea71be4f8fd0a8c47.png`,
-      title: `Anthrplogie AmerndeneFranz`,
-      desc: `Amazona`,
-      currentprice: `$ 11.90`,
-      mrp: `$19.99`,
-      discount: `50% OFF`,
-    },
-    {
-      id: 3,
-      img: `src/assets/Home/103f9e7351e74b8cedbb4739fb3420a7.png`,
-      title: `Anthrplogie AmerndeneFranz`,
-      desc: `Amazona`,
-      currentprice: `$ 11.90`,
-      mrp: `$19.99`,
-      discount: `50% OFF`,
-    },
-    {
-      id: 1,
-      img: `src/assets/Home/449dec675b9507acd4b0da8e1c64de66.png`,
-      title: `Anthrplogie AmerndeneFranz`,
-      desc: `Amazona`,
-      currentprice: `$ 11.90`,
-      mrp: `$19.99`,
-      discount: `50% OFF`,
-    },
-  ];
+    fetchBanners();
+  }, []);
 
-  const [activeCategory, setActiveCategory] = useState("Featured Products");
+  useEffect(() => {
+    const fetchLeftBanner = async () => {
+      try {
+        const response = await axios.get(
+          "https://bb.bechobookscan.com/api/getLeftBanner"
+        );
+        if (response.data.status && response.data.data.length > 0) {
+          setLeftBanner(response.data.data[0].image);
+        }
+      } catch (error) {
+        console.error("Error fetching left banner:", error);
+      }
+    };
 
+    fetchLeftBanner();
+  }, []);
+ 
+  // const handleAddToCart = async (product) => {
+  //   if (!authToken) {
+  //     Swal.fire({
+  //       icon: "warning",
+  //       title: "You are not logged in!",
+  //       text: "Please log in to add items to your cart.",
+  //       confirmButtonText: "Login",
+  //       showCancelButton: true,
+  //       cancelButtonText: "Cancel",
+  //     }).then((result) => {
+  //       if (result.isConfirmed) {
+  //         navigate("/login");
+  //       }
+  //     });
+  //     return;
+  //   }
+
+  //   try {
+  //     const response = await fetch("https://bb.bechobookscan.com/api/addToCart", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         "Authorization": `Bearer ${authToken}`,
+  //       },
+  //       body: JSON.stringify({ book_id: product.id }),
+  //     });
+
+  //     const data = await response.json();
+
+  //     if (data.status) {
+  //       Swal.fire({
+  //         icon: "success",
+  //         title: "Added to Cart",
+  //         text: "Book added to cart successfully!",
+  //       }).then(() => {
+  //         navigate("/cart"); // Navigate to cart page
+  //       });
+  //     } else {
+  //       Swal.fire({
+  //         icon: "error",
+  //         title: "Failed to Add",
+  //         text: data.message || "Failed to add book to cart.",
+  //       });
+  //     }
+  //   } catch (error) {
+  //     Swal.fire({
+  //       icon: "error",
+  //       title: "Error",
+  //       text: error.message || "Something went wrong. Please try again.",
+  //     });
+  //   }
+  // };
+const handleAddToCart = async (product) => {
+    if (!authToken) {
+      Swal.fire({
+        icon: "warning",
+        title: "You are not logged in!",
+        text: "Please log in to add items to your cart.",
+        confirmButtonText: "Login",
+        showCancelButton: true,
+        cancelButtonText: "Cancel",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          navigate("/login");
+        }
+      });
+      return;
+    }
+  
+    // Check if the product is already in the cart
+    const isProductInCart = cartItems.some((item) => item.book_id === product.id);
+  
+    if (isProductInCart) {
+      Swal.fire({
+        icon: "warning",
+        title: "Already in Cart",
+        text: "This book is already in your cart!",
+      });
+      return;
+    }
+  
+    try {
+      const response = await fetch("https://bb.bechobookscan.com/api/addToCart", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({ book_id: product.id }), // Ensure the correct field is sent
+      });
+  
+      const data = await response.json();
+  
+      if (data.status) {
+        Swal.fire({
+          icon: "success",
+          title: "Added to Cart",
+          text: "Book added to cart successfully!",
+        }).then(() => {
+          // navigate("/cart");
+        });
+  
+        // Update the cartItems state with the new item
+        setCartItems((prevItems) => [
+          ...prevItems,
+          { ...product, book_id: product.id }, // Ensure the correct structure
+        ]);
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Failed to Add",
+          text: data.message || "Failed to add book to cart.",
+        });
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: error.message || "Something went wrong. Please try again.",
+      });
+    }
+  };
+ 
+  useEffect(() => {
+    const fetchDiscountedBooks = async () => {
+      try {
+        const response = await fetch("https://bb.bechobookscan.com/api/getAllDiscountedBooks");
+        const data = await response.json();
+
+        if (data.status && data.data) {
+          // Transform API response to match the UI structure
+          const formattedProducts = data.data.map((item) => ({
+            id: item.id,
+            img: item.book.image,
+            title: item.book.title,
+            currentprice: `₹${item.price}`,
+            mrp: `₹${item.mrp}`,
+            discount: item.discount ? `${item.discount}% OFF` : null
+          }));
+
+          setProducts1(formattedProducts);
+        }
+      } catch (error) {
+        console.error("Error fetching books:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDiscountedBooks();
+  }, []);
+  useEffect(() => {
+    const fetchBestSellingBooks = async () => {
+      try {
+        const response = await fetch("https://bb.bechobookscan.com/api/getBestSellingBooks");
+        const data = await response.json();
+
+        if (data.status && data.data) {
+          // Extract books from multiple users
+          const extractedBooks = data.data.flatMap((order) => order.books);
+          setBooks(extractedBooks);
+        }
+      } catch (error) {
+        console.error("Error fetching best-selling books:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBestSellingBooks();
+  }, []);
+
+  const handleAddtoBulk = () => {
+    navigate('/bulk-booking')
+  }
+
+  const handleLoadMore = () => {
+    setVisibleCount(products1.length); // Show all remaining products
+  };
+  const [isOpen, setIsOpen] = useState(false);
+  
   return (
     <div className="w-screen h-full">
       <Header />
@@ -316,7 +531,7 @@ const Home = () => {
       <Banner1 />
 
       {/* service cards */}
-      <div className="hidden md:inline">
+      {/* <div className="hidden md:inline">
         <div className="flex items-center justify-between px-20 my-10">
           {cardDetails.map((dets, idx) => (
             <Card
@@ -327,10 +542,129 @@ const Home = () => {
             />
           ))}
         </div>
+      </div> */}
+      <div className="relative mt-12 py-3 px-1"> {/* Reduced padding */}
+        <Slider
+          {...settings}
+          slidesToShow={7.2} // More slides in view to reduce gap
+          slidesToScroll={1}
+        >
+          {categories.map((category) => (
+            <div key={category.id} className="text-center px-[2px]"> {/* Minimized spacing */}
+              <Link to={`/category/${category.id}`} className="flex flex-col items-center gap-y-1">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-2 border-yellow-400 flex items-center justify-center">
+                  <img
+                    src={category.image || "https://via.placeholder.com/100"}
+                    alt={category.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <span className="text-xs sm:text-sm font-medium text-gray-700 truncate w-20">
+                  {category.name}
+                </span>
+              </Link>
+            </div>
+          ))}
+        </Slider>
+      </div>
+
+      <div className="flex items-center justify-center mt-10 mb-10">
+        {/* Trigger Button */}
+        <button
+          className="flex items-center gap-3 bg-black text-white 
+             px-8 py-3 rounded-full font-extrabold text-lg tracking-wider shadow-xl 
+             hover:bg-gray-900 transform transition-all duration-300 ease-in-out 
+             hover:scale-110 border-2 border-transparent hover:border-red-500 animate-pulse"
+          onClick={handleAddtoBulk}
+        >
+
+          Bulk Order
+        </button>
+        {/* Modal */}
+        {/* {isOpen && (
+          <div className="fixed inset-0 z-50 bg-gray-900 bg-opacity-50 flex items-center justify-center">
+            <div className="bg-white w-full max-w-5xl rounded-lg shadow-lg overflow-hidden">
+
+              <div className="flex justify-between items-center p-4 border-b">
+                <h2 className="text-lg font-bold">Choose the plan that's right for you</h2>
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className="text-gray-600 hover:text-gray-800"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="p-6 overflow-y-auto h-[80vh]">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {plans.map((plan, index) => (
+                    <div
+                      key={index}
+                      className="border rounded-lg shadow-md overflow-hidden"
+                    >
+                      {plan.popular && (
+                        <div className="bg-purple-600 text-white text-center py-1 font-semibold">
+                          Most Popular
+                        </div>
+                      )}
+
+              
+                      <div className={`${plan.gradient} p-4 text-white`}>
+                        <h3 className="text-xl font-bold">{plan.title}</h3>
+                        <p className="text-sm">{plan.qty}</p>
+                      </div>
+
+                  
+                      <div className="p-6 space-y-4 text-gray-800">
+                        <div>
+                          <p className="font-semibold text-gray-900">Price</p>
+                          <p className="text-lg font-500">{plan.price}</p>
+                          <hr className="my-4 border-gray-300" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-gray-900">Book list</p>
+                          <p className="text-lg font-500">Available</p>
+                          <hr className="my-4 border-gray-300" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-gray-900">New : Used Ratio</p>
+                          <p className="text-lg font-500">{plan.ratio}</p>
+                          <hr className="my-4 border-gray-300" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-gray-900">Total MRP of books (Approx)</p>
+                          <p className="text-lg font-500"> {plan.mrp}</p>
+                          <hr className="my-4 border-gray-300" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-gray-900">Discount</p>
+                          <p className="text-lg font-500"> {plan.mrp}</p>
+                          <hr className="my-4 border-gray-300" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-gray-900">Doorstep Delivery Charges</p>
+                          <p className="text-lg font-500"> {plan.delivery}</p>
+                          <hr className="my-4 border-gray-300" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-gray-900">Category</p>
+                          <p className="text-lg font-500"> {plan.category}</p>
+                          <hr className="my-4 border-gray-300" />
+                        </div>
+
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )} */}
+
       </div>
 
       {/* sale banners */}
-      <div className="w-full px-4 md:px-20  flex flex-col md:flex-row items-center justify-between gap-[7%] ">
+      {/* <div className="w-full px-4 md:px-20  flex flex-col md:flex-row items-center justify-between gap-[7%] ">
         <div className="w-full md:w-1/2 my-6">
           <img
             src="src\assets\Home\d25634b4fca6a453cb2a929962588890.png"
@@ -345,17 +679,67 @@ const Home = () => {
             className="w-full rounded-xl"
           />
         </div>
-      </div>
+      </div> */}
+      {/* <div className="w-full px-4 md:px-20 flex flex-col md:flex-row items-center justify-between gap-[7%]"> */}
+      {/* Dynamic Left Banner */}
+      {/* <div className="w-full md:w-1/2 my-6">
+          {leftBanner ? (
+            <img
+              src={leftBanner}
+              alt="Left Banner"
+              className="w-full rounded-xl"
+            />
+          ) : (
+            <p>Loading...</p> // Show a loading state while fetching
+          )}
+        </div> */}
 
+      {/* Static Right Banner */}
+      {/* <div className="w-full md:w-1/2 my-1">
+          <img
+            src="src/assets/Home/ff7d48960a1e84d5c7c5b6feda8287b8.png"
+            alt="Right Banner"
+            className="w-full rounded-xl"
+          />
+        </div> */}
+      {/* <div className="w-full md:w-1/2 my-1">
+          {rightBanner ? (
+            <img
+              src={rightBanner}
+              alt="Right Banner"
+              className="w-full rounded-xl"
+            />
+          ) : (
+            <p>Loading...</p> // Show a loading state while fetching
+          )}
+        </div>
+      </div> */}
       {/* products navigation */}
-      <div className="w-full px-4 md:px-20 my-4 flex justify-between text-[2vw] sm:text-[2vw] md:text-[1.5vw] lg:text-[1.2vw] ">
+      {/* <div className="w-full px-4 md:px-20 my-4 flex justify-between text-[2vw] sm:text-[2vw] md:text-[1.5vw] lg:text-[1.2vw] ">
+        {Object.keys(products).map((category) => (
+          <h1
+            key={category}
+            className={`cursor-pointer border-b-2 pb-1 px-8 md:px-[8vw] lg:px-[10vw] font-medium ${activeCategory === category
+              ? "border-gray-900"
+              : "border-gray-400 text-gray-400"
+              }`}
+            onClick={() => setActiveCategory(category)}
+          >
+            {category}
+          </h1>
+        ))}
+      </div> */}
+
+
+
+      {/* <div className="w-full px-4 md:px-20 my-4 flex flex-col">
+    
+      <div className="flex justify-between text-[2vw] sm:text-[2vw] md:text-[1.5vw] lg:text-[1.2vw]">
         {Object.keys(products).map((category) => (
           <h1
             key={category}
             className={`cursor-pointer border-b-2 pb-1 px-8 md:px-[8vw] lg:px-[10vw] font-medium ${
-              activeCategory === category
-                ? "border-gray-900"
-                : "border-gray-400 text-gray-400"
+              activeCategory === category ? "border-gray-900" : "border-gray-400 text-gray-400"
             }`}
             onClick={() => setActiveCategory(category)}
           >
@@ -363,8 +747,218 @@ const Home = () => {
           </h1>
         ))}
       </div>
-      {/* products  mobile cards */}
-      <div className="px-4 md:hidden py-2">
+
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
+        {products[activeCategory].map((product) => (
+          <div key={product.id} className="border p-4 rounded-lg shadow-md">
+            <img src={product.img} alt={product.title} className="w-full h-40 object-cover" />
+            <h2 className="font-semibold mt-2">{product.title}</h2>
+            <p className="text-gray-500">{product.desc}</p>
+            <div className="flex justify-between items-center mt-2">
+              <span className="text-lg font-bold">{product.currentprice}</span>
+              <span className="text-sm line-through text-gray-400">{product.mrp}</span>
+              <span className="text-red-500">{product.discount}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div> */}
+
+      {/* <div className="w-full px-4 md:px-20 my-4 flex flex-col">
+      
+        <div className="flex justify-between text-[2vw] sm:text-[2vw] md:text-[1.5vw] lg:text-[1.2vw]">
+          {Object.keys(products).map((category) => (
+            <h1
+              key={category}
+              className={`cursor-pointer border-b-2 pb-1 px-8 md:px-[8vw] lg:px-[10vw] font-medium ${activeCategory === category ? "border-gray-900" : "border-gray-400 text-gray-400"
+                }`}
+              onClick={() => setActiveCategory(category)}
+            >
+              {category}
+            </h1>
+          ))}
+        </div>
+
+        <div className="flex flex-col justify-center items-center min-h-screen">
+          <div className="max-w-6xl mx-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mt-4 w-full">
+              {products[activeCategory]?.slice(0, 10).map((product) => (  // Slice first 10 books
+                <div
+                  key={product.id}
+                  className="border p-4 rounded-lg shadow-md cursor-pointer transition transform hover:scale-105"
+                  onClick={() => navigate(`/product/${product.id}`)} // Navigate to product page
+                >
+                  <img src={product.img} alt={product.title} className="w-full h-45 object-contain" />
+                  <h2 className="font-semibold mt-2 truncate w-full">{product.title}</h2>
+                  <div className="flex items-center justify-between mt-2">
+                    <span className="text-lg font-bold text-black">{product.currentprice}</span>
+                    <span className="text-gray-400 line-through text-sm">{product.mrp}</span>
+                  </div>
+                  {product.discount && product.discount !== "null% OFF" ? (
+                    <div className="flex items-center justify-between mt-1">
+                      <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                        {product.discount.replace("null% OFF", "").trim()}
+                      </span>
+                    </div>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+      </div> */}
+      <div className="w-full px-4 md:px-20 my-4 flex flex-col">
+        <div className="flex justify-between text-[2vw] sm:text-[2vw] md:text-[1.5vw] lg:text-[1.2vw]">
+          {Object.keys(products).map((category) => (
+            <h1
+              key={category}
+              className={`cursor-pointer border-b-2 pb-1 px-8 md:px-[8vw] lg:px-[10vw] font-medium ${activeCategory === category ? "border-gray-900" : "border-gray-400 text-gray-400"
+                }`}
+              onClick={() => setActiveCategory(category)}
+            >
+              {category}
+            </h1>
+          ))}
+        </div>
+
+        <div className="flex flex-col justify-center items-center min-h-screen">
+          <div className="max-w-6xl mx-5 w-full">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mt-4 w-full">
+              {products[activeCategory]?.slice(0, 10).map((product) => (
+                <div
+                  key={product.id}
+                  className="relative border p-4 rounded-lg shadow-md cursor-pointer transition transform hover:scale-105 max-sm:p-2 max-sm:scale-95 flex flex-col justify-between" // Added "flex flex-col justify-between"
+                  onClick={() => navigate(`/product/${product.id}`)}
+                >
+                  <img
+                    src={product.img}
+                    alt={product.title}
+                    className="w-full h-45 object-contain max-sm:h-[100px]" // Smaller image on mobile
+                  />
+                  <h2 className="font-semibold mt-2 truncate w-full max-sm:text-sm"> {/* Smaller text on mobile */}
+                    {product.title}
+                  </h2>
+                  <div className="flex items-center justify-between mt-2">
+                    <span className="text-lg font-bold text-black max-sm:text-base"> {/* Smaller text on mobile */}
+                      ₹{product.currentprice.replace(/\$/g, "")}
+                    </span>
+                    <span className="text-orange-400 line-through text-sm max-sm:text-xs"> {/* Smaller text on mobile */}
+                      ₹{product.mrp.replace(/\$/g, "")}
+                    </span>
+                  </div>
+                  {product.discount && product.discount !== "null% OFF" ? (
+                    <div className="flex items-center justify-between mt-1">
+                      <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full max-sm:text-[10px]"> {/* Smaller text on mobile */}
+                        {product.discount.replace("null% OFF", "").trim()}
+                      </span>
+                    </div>
+                  ) : null}
+
+                  {/* Cart Button Wrapper */}
+                  <div className="flex justify-end items-center mt-2"> {/* Ensures button stays at the bottom */}
+                    <button
+                      className="bg-white border border-gray-300 p-2 rounded-full shadow-md transition hover:bg-gray-200 flex items-center justify-center"
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent navigating to product page
+                        handleAddToCart(product);
+                      }}
+                    >
+                      <img
+                        src="https://cdn-icons-png.flaticon.com/512/1170/1170678.png"
+                        alt="Add to Cart"
+                        className="w-5 h-5 max-sm:w-4 max-sm:h-4"
+                      />
+                    </button>
+                  </div>
+                </div>
+
+
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* deal of the day heading */}
+      <div className="flex justify-center my-10">
+        <button className="bg-gradient-to-r from-red-500 to-orange-500 text-white text-lg md:text-2xl font-bold py-3 px-6 rounded-full shadow-lg transition duration-300 transform hover:scale-105">
+          🔥 Deal of the Day 🔥
+        </button>
+      </div>
+
+      <div className="flex justify-center items-center min-h-screen px-4 sm:px-6 lg:px-0">
+        <div className="max-w-6xl mx-auto">
+          {loading ? (
+            <p className="text-center text-lg font-semibold">Loading books...</p>
+          ) : (
+            <>
+              {/* <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mt-4 w-full"> */}
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mt-4 w-full">
+                {products1.slice(0, visibleCount).map((product) => (
+                  <div
+                    key={product.id}
+                    className="relative border p-4 rounded-lg shadow-md cursor-pointer transition transform hover:scale-105"
+                    onClick={() => navigate(`/product/${product.id}`)}
+                  >
+                    <img
+                      src={product.img}
+                      alt={product.title}
+                      className="w-full h-45 object-contain max-sm:h-[100px]"
+                    />
+                    <h2 className="font-semibold mt-2 truncate w-full">{product.title}</h2>
+                    <div className="flex items-center justify-between mt-2">
+                      <span className="text-lg font-bold text-black">{product.currentprice}</span>
+                      <span className="text-orange-400 line-through text-sm">{product.mrp}</span>
+                    </div>
+                    {product.discount && (
+                      <div className="flex items-center justify-between mt-1">
+                        <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                          {product.discount}
+                        </span>
+                      </div>
+                    )}
+                    <div className="flex justify-end items-center mt-2"> {/* Ensures button stays at the bottom */}
+                      <button
+                        className="bg-white border border-gray-300 p-2 rounded-full shadow-md transition hover:bg-gray-200 flex items-center justify-center"
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent navigating to product page
+                          handleAddToCart(product);
+                        }}
+                      >
+                        <img
+                          src="https://cdn-icons-png.flaticon.com/512/1170/1170678.png"
+                          alt="Add to Cart"
+                          className="w-5 h-5 max-sm:w-4 max-sm:h-4"
+                        />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {visibleCount < products1.length && (
+                <div className="flex justify-center mt-4">
+                  <button
+                    onClick={handleLoadMore}
+                    className="bg-red-600 text-white px-6 py-3 rounded-md font-semibold hover:bg-red-700 transition m-10"
+                  >
+                    Load More
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* best sellers heading*/}
+      {/* <div className="w-[80vw] mx-auto my-10  ">
+        <h1 className="text-center text-3xl border-b-4 w-fit mx-auto pb-2 rounded border-lime-600">
+          Best sellers
+        </h1>
+      </div> */}
+      {/*best seller mobile cards */}
+      {/* <div className="px-4 md:hidden py-2">
         <Swiper
           spaceBetween={20}
           slidesPerView={1}
@@ -376,7 +970,7 @@ const Home = () => {
             },
           }}
         >
-          {products[activeCategory].map((product, idx) => (
+          {bestSellers.map((product, idx) => (
             <SwiperSlide key={idx}>
               <ProductCard1
                 img={product.img}
@@ -389,61 +983,11 @@ const Home = () => {
             </SwiperSlide>
           ))}
         </Swiper>
-      </div>
-      {/* products  desktop cards */}
-      <div className="hidden md:inline">
-        <div className="flex px-20 flex-wrap gap-20">
-          {products[activeCategory].map((product, idx) => (
-            <ProductCardWeb
-              key={idx}
-              img={product.img}
-              title={product.title}
-              desc={product.desc}
-              currentprice={product.currentprice}
-              mrp={product.mrp}
-              discount={product.discount}
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* deal of the day heading */}
-      <div className="px-4 md:px-20  my-10  text-white ">
-        <h1 className="py-4 text-center text-lg md:text-3xl bg-black">
-          Deal of the day up to 20% off Special offer
-        </h1>
-      </div>
-      {/*deal of the day products mobile cards */}
-      <div className="px-4 md:hidden py-4">
-        <Swiper
-          spaceBetween={20}
-          slidesPerView={1}
-          pagination={{ clickable: true }}
-          breakpoints={{
-            640: {
-              slidesPerView: 2,
-              spaceBetween: 40,
-            },
-          }}
-        >
-          {dealOfTheDay.map((product, idx) => (
-            <SwiperSlide key={idx}>
-              <ProductCard3
-                img={product.img}
-                title={product.title}
-                desc={product.desc}
-                currentprice={product.currentprice}
-                mrp={product.mrp}
-                discount={product.discount}
-              />
-            </SwiperSlide>
-          ))}
-        </Swiper>
-      </div>
-      {/*deal of the day products  desktop cards */}
-      <div className="hidden md:inline">
-        <div className="flex px-20 flex-wrap gap-20">
-          {dealOfTheDay.map((product, idx) => (
+      </div> */}
+      {/*best sellers desktop cards */}
+      {/* <div className="hidden md:inline">
+        <div className="flex px-20 flex-wrap gap-10">
+          {bestSellers.map((product, idx) => (
             <ProductCard4
               key={idx}
               img={product.img}
@@ -455,120 +999,171 @@ const Home = () => {
             />
           ))}
         </div>
-      </div>
+      </div> */}
 
-      {/* best sellers heading*/}
-      <div className="w-[80vw] mx-auto my-10  ">
-        <h1 className="text-center text-3xl border-b-4 w-fit mx-auto mb-10 pb-2 rounded border-lime-600">
-          Best sellers
+      {/* <div className="flex flex-col justify-center items-center min-h-screen">
+       
+        <h1 className="text-center text-3xl border-b-4 w-fit mx-auto pb-2 rounded border-lime-600 mt-12">
+          Best Sellers
         </h1>
-      </div>
-      {/*best seller mobile cards */}
-      <div className="px-4 md:hidden py-2">
-        <Swiper
-          spaceBetween={20}
-          slidesPerView={1}
-          pagination={{ clickable: true }}
-          breakpoints={{
-            640: {
-              slidesPerView: 2,
-              spaceBetween: 40,
-            },
-          }}
-        >
-          {bestSellers.map((product, idx) => (
-            <SwiperSlide key={idx}>
-              <ProductCard1
-                img={product.img}
-                title={product.title}
-                desc={product.desc}
-                currentprice={product.currentprice}
-                mrp={product.mrp}
-                discount={product.discount}
-              />
-            </SwiperSlide>
-          ))}
-        </Swiper>
-      </div>
-      {/*best sellers desktop cards */}
-      <div className="hidden md:inline">
-        <div className="flex px-20 flex-wrap gap-20">
-          {bestSellers.map((product, idx) => (
-            <ProductCardWeb
-              key={idx}
-              img={product.img}
-              title={product.title}
-              desc={product.desc}
-              currentprice={product.currentprice}
-              mrp={product.mrp}
-              discount={product.discount}
-            />
-          ))}
+
+        <div className="max-w-6xl mx-auto mt-6 px-4 sm:px-6 lg:px-0">
+          {loading ? (
+            <p className="text-center text-lg font-semibold">Loading books...</p>
+          ) : (
+            
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mt-4 w-full">
+              {books.map((book) =>
+                book.title && book.image ? ( // Ensure book has valid data
+                  <div
+                    key={book.id}
+                    className="relative border p-4 rounded-lg shadow-md cursor-pointer transition transform hover:scale-105"
+                    onClick={() => navigate(`/product/${book.id}`)}
+                  >
+                    <img
+                      src={book.image}
+                      alt={book.title}
+                      className="w-full h-45 object-contain max-sm:h-[100px]"
+                    />
+                    <h2 className="font-semibold mt-2 truncate w-full">{book.title}</h2>
+                    <div className="flex items-center justify-between mt-2">
+                      <span className="text-lg font-bold text-black">₹{book.price}</span>
+                    </div>
+                    <div className="flex justify-end items-center mt-2"> 
+                      <button
+                        className="bg-white border border-gray-300 p-2 rounded-full shadow-md transition hover:bg-gray-200 flex items-center justify-center"
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent navigating to product page
+                          handleAddToCart(book);
+                        }}
+                      >
+                        <img
+                          src="https://cdn-icons-png.flaticon.com/512/1170/1170678.png"
+                          alt="Add to Cart"
+                          className="w-5 h-5 max-sm:w-4 max-sm:h-4"
+                        />
+                      </button>
+                    </div>
+                  </div>
+                ) : null
+
+              )}
+            </div>
+          )}
+        </div>
+      </div> */}
+{books.length > 0 && (
+  <div className="flex flex-col justify-center items-center min-h-screen">
+    {/* Heading */}
+    <h1 className="text-center text-3xl border-b-4 w-fit mx-auto pb-2 rounded border-lime-600 mt-12">
+      Best Sellers
+    </h1>
+
+    {/* Books Container */}
+    <div className="max-w-6xl mx-auto mt-6 px-4 sm:px-6 lg:px-0">
+      {loading ? (
+        <p className="text-center text-lg font-semibold">Loading books...</p>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mt-4 w-full">
+          {books.map((book) =>
+            book.title && book.image ? ( // Ensure book has valid data
+              <div
+                key={book.id}
+                className="relative border p-4 rounded-lg shadow-md cursor-pointer transition transform hover:scale-105"
+                onClick={() => navigate(`/product/${book.id}`)}
+              >
+                <img
+                  src={book.image}
+                  alt={book.title}
+                  className="w-full h-45 object-contain max-sm:h-[100px]"
+                />
+                <h2 className="font-semibold mt-2 truncate w-full">{book.title}</h2>
+                <div className="flex items-center justify-between mt-2">
+                  <span className="text-lg font-bold text-black">₹{book.price}</span>
+                </div>
+                <div className="flex justify-end items-center mt-2">
+                  <button
+                    className="bg-white border border-gray-300 p-2 rounded-full shadow-md transition hover:bg-gray-200 flex items-center justify-center"
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent navigating to product page
+                      handleAddToCart(book);
+                    }}
+                  >
+                    <img
+                      src="https://cdn-icons-png.flaticon.com/512/1170/1170678.png"
+                      alt="Add to Cart"
+                      className="w-5 h-5 max-sm:w-4 max-sm:h-4"
+                    />
+                  </button>
+                </div>
+              </div>
+            ) : null
+          )}
+        </div>
+      )}
+    </div>
+  </div>
+)}
+
+      {/* videoplayer */}
+      <div className="flex justify-center items-center">
+        <div className="w-3/4">
+          <Video src="src/assets/Home/booksVideo.mp4" />
         </div>
       </div>
 
-      {/* videoplayer */}
-      <Video src="src/assets/Home/booksVideo.mp4" />
 
-      <Banner2 />
-      <Banner3 />
+
+      {/* <Banner2 />
+      <Banner3 /> */}
 
       {/*Latest Blogs heading*/}
-      <div className="w-[80vw] mx-auto my-10  ">
+      {/* <div className="w-[80vw] mx-auto my-10  ">
         <h1 className="text-center text-3xl border-b-4 w-fit mx-auto mb-10 pb-2 rounded border-lime-600">
           Latest Blogs
         </h1>
-      </div>
+      </div> */}
       {/* Mobile slide */}
-<Blog/>
+      {/* <Blog /> */}
 
 
       {/* Our Partners */}
-      <div className="flex gap-10 animate-marquee px-4 md:px-20 my-4 overflow-x-hidden">
+      {/* <div className="flex gap-10 animate-marquee px-4 md:px-20 my-4 overflow-x-hidden">
         <img
-          src="https://s3-alpha-sig.figma.com/img/93af/20f8/22ebbc7d8b7e2a60c66457bfdec3adeb?Expires=1733097600&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=o7KfOWSS7c~KKDzsmmlSzH3ZRbPObAX8plojlZRRTSuiCDUW6-EY0roCQIbIerns2LRE1dngkT86F-K7DRIFu8wuuqGvKwVAcz78352SPdPAYg3ToE7PUSa~LTAB1nvDWdRBjigNE7Qdyv3Hpy9V062tyKKYyRhoaueLtL8bmoYYREe1U0qtTxaOR18B-L60P5rpJYmKxS~g~-xHhdWKfPNPpJCTdSL4XtisQ3jz4AhegRR0C67czQV5spn2u1~uJsMjBHPTWWRuq74u1CtOTe1Lev6sQc5f3DtHS3vvL3nw6UpT~MDTphiehhcrvsXD-KYxGLb2xPuJ91Y5KfZx8A__"
-          className="border-2"
+          src={Image1}
+          className="border-2 w-[200px]"
           alt="Image 1"
         />
         <img
-          src="https://s3-alpha-sig.figma.com/img/e79a/b3f9/c08c405de29ec535771b51b66588f0e1?Expires=1733097600&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=MxDy9VN9TnTdW4OfCJsboJXwZl7Q-Gavm9cH8~4xl0eqf3HViqOXuMpIovD4NTwGINrnuYvaOvIxWCx9~NkrY7W7KPwuGn1dfTbBmfrtRm~gIhxMw4K-7PWRaGLcDsm-E69w4Dy7OdONBkVxTU2oU9JKdsISYDsVU8k~AaSs9GTwAiDLc6FJ6vgy1DactYig0jk0pDIagEOkR7eTrs4qH0GHXIAXSkDg9kImyPf7cLXH1yzMdfY3KHrEvjyWB-dj9fKZT3PwPtUwr-Q0tI8wGWyZr~fnBgZHRCoSREQWz8W49OoEhHPHJxNyr13ebEZWLfqTl3m3CdITzmsVzw7K4w__"
-          className="border-2"
+          src={Image2}
+          className="border-2 w-[200px]"
           alt="Image 2"
         />
         <img
-          src="https://s3-alpha-sig.figma.com/img/93af/20f8/22ebbc7d8b7e2a60c66457bfdec3adeb?Expires=1733097600&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=o7KfOWSS7c~KKDzsmmlSzH3ZRbPObAX8plojlZRRTSuiCDUW6-EY0roCQIbIerns2LRE1dngkT86F-K7DRIFu8wuuqGvKwVAcz78352SPdPAYg3ToE7PUSa~LTAB1nvDWdRBjigNE7Qdyv3Hpy9V062tyKKYyRhoaueLtL8bmoYYREe1U0qtTxaOR18B-L60P5rpJYmKxS~g~-xHhdWKfPNPpJCTdSL4XtisQ3jz4AhegRR0C67czQV5spn2u1~uJsMjBHPTWWRuq74u1CtOTe1Lev6sQc5f3DtHS3vvL3nw6UpT~MDTphiehhcrvsXD-KYxGLb2xPuJ91Y5KfZx8A__"
-          className="border-2"
+          src={Image3}
+          className="border-2 w-[200px]"
           alt="Image 2"
         />
         <img
-          src="https://s3-alpha-sig.figma.com/img/e79a/b3f9/c08c405de29ec535771b51b66588f0e1?Expires=1733097600&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=MxDy9VN9TnTdW4OfCJsboJXwZl7Q-Gavm9cH8~4xl0eqf3HViqOXuMpIovD4NTwGINrnuYvaOvIxWCx9~NkrY7W7KPwuGn1dfTbBmfrtRm~gIhxMw4K-7PWRaGLcDsm-E69w4Dy7OdONBkVxTU2oU9JKdsISYDsVU8k~AaSs9GTwAiDLc6FJ6vgy1DactYig0jk0pDIagEOkR7eTrs4qH0GHXIAXSkDg9kImyPf7cLXH1yzMdfY3KHrEvjyWB-dj9fKZT3PwPtUwr-Q0tI8wGWyZr~fnBgZHRCoSREQWz8W49OoEhHPHJxNyr13ebEZWLfqTl3m3CdITzmsVzw7K4w__"
-          className="border-2"
+          src={Image3}
+          className="border-2 w-[200px]"
+
           alt="Image 2"
         />
         <img
-          src="https://s3-alpha-sig.figma.com/img/93af/20f8/22ebbc7d8b7e2a60c66457bfdec3adeb?Expires=1733097600&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=o7KfOWSS7c~KKDzsmmlSzH3ZRbPObAX8plojlZRRTSuiCDUW6-EY0roCQIbIerns2LRE1dngkT86F-K7DRIFu8wuuqGvKwVAcz78352SPdPAYg3ToE7PUSa~LTAB1nvDWdRBjigNE7Qdyv3Hpy9V062tyKKYyRhoaueLtL8bmoYYREe1U0qtTxaOR18B-L60P5rpJYmKxS~g~-xHhdWKfPNPpJCTdSL4XtisQ3jz4AhegRR0C67czQV5spn2u1~uJsMjBHPTWWRuq74u1CtOTe1Lev6sQc5f3DtHS3vvL3nw6UpT~MDTphiehhcrvsXD-KYxGLb2xPuJ91Y5KfZx8A__"
-          className="border-2"
+          src={Image3}
+          className="border-2 w-[200px]"
           alt="Image 2"
         />
-        <img
-          src="https://s3-alpha-sig.figma.com/img/e79a/b3f9/c08c405de29ec535771b51b66588f0e1?Expires=1733097600&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=MxDy9VN9TnTdW4OfCJsboJXwZl7Q-Gavm9cH8~4xl0eqf3HViqOXuMpIovD4NTwGINrnuYvaOvIxWCx9~NkrY7W7KPwuGn1dfTbBmfrtRm~gIhxMw4K-7PWRaGLcDsm-E69w4Dy7OdONBkVxTU2oU9JKdsISYDsVU8k~AaSs9GTwAiDLc6FJ6vgy1DactYig0jk0pDIagEOkR7eTrs4qH0GHXIAXSkDg9kImyPf7cLXH1yzMdfY3KHrEvjyWB-dj9fKZT3PwPtUwr-Q0tI8wGWyZr~fnBgZHRCoSREQWz8W49OoEhHPHJxNyr13ebEZWLfqTl3m3CdITzmsVzw7K4w__"
-          className="border-2"
-          alt="Image 2"
-        />
-        <img
-          src="https://s3-alpha-sig.figma.com/img/93af/20f8/22ebbc7d8b7e2a60c66457bfdec3adeb?Expires=1733097600&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=o7KfOWSS7c~KKDzsmmlSzH3ZRbPObAX8plojlZRRTSuiCDUW6-EY0roCQIbIerns2LRE1dngkT86F-K7DRIFu8wuuqGvKwVAcz78352SPdPAYg3ToE7PUSa~LTAB1nvDWdRBjigNE7Qdyv3Hpy9V062tyKKYyRhoaueLtL8bmoYYREe1U0qtTxaOR18B-L60P5rpJYmKxS~g~-xHhdWKfPNPpJCTdSL4XtisQ3jz4AhegRR0C67czQV5spn2u1~uJsMjBHPTWWRuq74u1CtOTe1Lev6sQc5f3DtHS3vvL3nw6UpT~MDTphiehhcrvsXD-KYxGLb2xPuJ91Y5KfZx8A__"
-          className="border-2"
-          alt="Image 2"
-        />
-        {/* Repeat as needed */}
-      </div>
+      
+      </div> */}
 
       {/* mobile footer */}
-      <div className="md:hidden">
+      {/* <div className="md:hidden">
         <Footer2 />
-      </div>
+      </div> */}
       {/* desktop footer */}
-      <div className="hidden md:inline">
+      <div className=" md:inline">
         <Footer />
       </div>
     </div>
