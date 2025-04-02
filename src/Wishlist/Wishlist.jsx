@@ -101,6 +101,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Header from "../components/Header/Header";
 import Nav from "../components/Header/Nav";
+import Pagination from "../components/Pagination/Pagination";
 import Footer from "../components/Footer/Footer";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
@@ -207,7 +208,7 @@ const { cartItems, setCartItems } = useCart();
     const fetchWishlist = async () => {
       try {
         const response = await fetch(
-          "https://bb.bechobookscan.com/api/getWishlist", // Add page parameter if needed
+          `https://bb.bechobookscan.com/api/getWishlist?page=${currentPage}`, // Add page parameter if needed
           {
             headers: {
               Authorization: `Bearer ${authToken}`,
@@ -221,11 +222,12 @@ const { cartItems, setCartItems } = useCart();
         }
   
         const data = await response.json();
-  
+            console.log(data)
         if (data.status) {
+          setTotalPages(data.pagination?.last_page ?? 1);
           // Transform API data to match the product structure
           const transformedData = data.data
-            .filter((item) => item.active_inactive === 1) // Filter out inactive books
+            // .filter((item) => item.active_inactive === 1) // Filter out inactive books
             .map((item) => ({
               id: item.id,
               book_id: item.book_id,
@@ -250,7 +252,10 @@ const { cartItems, setCartItems } = useCart();
     };
   
     fetchWishlist();
-  }, [authToken]);
+  }, [authToken,currentPage]);
+    const handlePageChange = (page)=>{
+        setCurrentPage(page)
+    }
   // const handleAddToCart = async (product) => {
   //   if (!authToken) {
   //     Swal.fire({
@@ -527,6 +532,13 @@ const { cartItems, setCartItems } = useCart();
       </div>
     ))}
   </div>
+  <div className="flex justify-center">
+        <Pagination
+        totalPages={totalPages}
+        currentPage={currentPage}
+        goToPage={handlePageChange}
+        />
+        </div>
 </div>
 
       <Footer />
