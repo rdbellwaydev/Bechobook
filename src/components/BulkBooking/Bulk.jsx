@@ -154,9 +154,6 @@
 //         </div>
 //       </div>
 
-
-
-
 //       <Footer />
 
 //     </>
@@ -335,7 +332,14 @@ import HashLoader from "react-spinners/HashLoader";
 
 const BulkBookingPage = () => {
   const navigate = useNavigate();
-  const { getAllBrochures, getAverageBrochureBooks, getStandardBrochureBooks, getPremiumBrochureBooks, getBasicLiteBrochureBooks, getBasicBrochureBooks } = useBrochureService();
+  const {
+    getAllBrochures,
+    getAverageBrochureBooks,
+    getStandardBrochureBooks,
+    getPremiumBrochureBooks,
+    getBasicLiteBrochureBooks,
+    getBasicBrochureBooks,
+  } = useBrochureService();
 
   const [brochures, setBrochures] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -347,8 +351,8 @@ const BulkBookingPage = () => {
         const data = await getAllBrochures();
         const combinedBrochures = [
           ...data.average_brochures,
-          ...data.standard_brochures,
           ...data.premium_brochures,
+          ...data.standard_brochures,
           ...data.basic_lite_brochures,
           ...data.basic_brochures,
         ];
@@ -367,25 +371,26 @@ const BulkBookingPage = () => {
   const handleChecklist = async (brochureName) => {
     try {
       let brochureDetails;
-      let redirectTo = "";  // Define the URL dynamically
+      let redirectTo = ""; // Define the URL dynamically
 
       // Call different API based on brochure type
       switch (brochureName) {
         case "Average":
           brochureDetails = await getAverageBrochureBooks();
-          redirectTo = "/checklist";  // Navigate to Average page
-          break;
-        case "Standard":
-          brochureDetails = await getStandardBrochureBooks();
-          redirectTo = "/checklist-standard";  // Navigate to Standard page
+          redirectTo = "/checklist"; // Navigate to Average page
           break;
         case "Premium":
           brochureDetails = await getPremiumBrochureBooks();
-          redirectTo = "/checklist-premium";  // Navigate to Premium page
+          redirectTo = "/checklist-premium"; // Navigate to Premium page
           break;
+        case "Standard":
+          brochureDetails = await getStandardBrochureBooks();
+          redirectTo = "/checklist-standard"; // Navigate to Standard page
+          break;
+
         case "Basic Lite":
           brochureDetails = await getBasicLiteBrochureBooks();
-          redirectTo = "/checklist-basic-lite";  // Navigate to Basic Lite page
+          redirectTo = "/checklist-basic-lite"; // Navigate to Basic Lite page
           break;
         case "Basic":
           brochureDetails = await getBasicBrochureBooks();
@@ -397,7 +402,6 @@ const BulkBookingPage = () => {
 
       // Navigate to the respective checklist page with the brochure data
       navigate(redirectTo, { state: brochureDetails });
-
     } catch (err) {
       console.error("Error fetching brochure details:", err);
     }
@@ -425,81 +429,98 @@ const BulkBookingPage = () => {
       <Header />
       <Nav />
       <div className="p-3">
-  <h2 className="text-md font-bold text-start mb-8">
-    Choose the plan that's right for you
-  </h2>
-  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
-    {brochures.map((plan, index) => (
-      <div key={index} className="w-full">
-        <div className="relative border rounded-md shadow-sm overflow-visible">
-          {plan.brochure_name === "Premium" && (
-            <div className="absolute top-[-1.5rem] left-0 right-0 bg-purple-600 text-white rounded-t-md text-center py-1 text-xs font-semibold z-10 max-w-full">
-              Best Seller
-            </div>
-          )}
+        <h2 className="text-md font-bold text-start mb-8">
+          Choose the plan that's right for you
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+          {brochures.map((plan, index) => (
+            <div key={index} className="max-w-full">
+              <div className={`relative border ${plan.brochure_name === "Standard" ? "rounded-b-md" :'rounded-md'} shadow-sm overflow-visible p-2 max-w-full`}>
+                {plan.brochure_name === "Standard" && (
+                  <div className="absolute top-[-1.35rem] left-0 right-0 bg-purple-600 text-white rounded-t-md text-center py-1 text-xs font-semibold z-10 max-w-full">
+                    Best Seller
+                  </div>
+                )}
 
-          <div
-            className={`${gradients[plan.brochure_name] || "bg-gradient-to-r from-gray-500 to-gray-700"} p-2 text-white`}
-          >
-            <h3 className="text-sm font-semibold">{plan.brochure_name}</h3>
-            <p className="text-xs">Qty {plan.qty_of_books} books</p>
-          </div>
+                <div
+                  className={`${
+                    gradients[plan.brochure_name] ||
+                    "bg-gradient-to-r from-gray-500 to-gray-700"
+                  } p-2 text-white rounded`}
+                >
+                  <h3 className="text-sm font-semibold">
+                    {plan.brochure_name}
+                  </h3>
+                  <p className="text-xs">Qty {plan.qty_of_books} books</p>
+                </div>
 
-          <div className="p-3 space-y-2 text-gray-800">
-            <div>
-              <p className="font-medium text-gray-900 text-xs">Price</p>
-              <p className="text-sm font-medium">₹{plan.price}</p>
-              <hr className="my-1 border-gray-300" />
-            </div>
-            <div>
-              <p className="font-medium text-gray-900 text-xs">Book list</p>
-              <p className="text-sm font-medium">{plan.book_list}</p>
-              <hr className="my-1 border-gray-300" />
-            </div>
-            <div>
-              <p className="font-medium text-gray-900 text-xs">New : Used Ratio</p>
-              <p className="text-sm font-medium">{plan.new_used_ratio}</p>
-              <hr className="my-1 border-gray-300" />
-            </div>
-            <div>
-              <p className="font-medium text-gray-900 text-xs">
-                Total MRP of books (Approx)
-              </p>
-              <p className="text-sm font-medium">{plan.total_mrp_of_books}</p>
-              <hr className="my-1 border-gray-300" />
-            </div>
-            <div>
-              <p className="font-medium text-gray-900 text-xs">Discount</p>
-              <p className="text-sm font-medium">{plan.discount}%</p>
-              <hr className="my-1 border-gray-300" />
-            </div>
-            <div>
-              <p className="font-medium text-gray-900 text-xs">
-                Doorstep Delivery Charges
-              </p>
-              <p className="text-sm font-medium">{plan.doorstep_delivery_charge}</p>
-              <hr className="my-1 border-gray-300" />
-            </div>
-            <div>
-              <p className="font-medium text-gray-900 text-xs">Category</p>
-              <p className="text-sm font-medium">{plan.category}</p>
-              <hr className="my-1 border-gray-300" />
-            </div>
-          </div>
-        </div>
+                <div className="p-3 space-y-2 text-gray-800">
+                  <div>
+                    <p className="font-medium text-gray-900 text-xs">Price</p>
+                    <p className="text-sm font-medium">₹{plan.price}</p>
+                    <hr className="my-1 border-gray-300" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-900 text-xs">
+                      Book list
+                    </p>
+                    <p className="text-sm font-medium">{plan.book_list}</p>
+                    <hr className="my-1 border-gray-300" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-900 text-xs">
+                      New : Used Ratio
+                    </p>
+                    <p className="text-sm font-medium">{plan.new_used_ratio}</p>
+                    <hr className="my-1 border-gray-300" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-900 text-xs">
+                      Total MRP of books (Approx)
+                    </p>
+                    <p className="text-sm font-medium">
+                      {plan.total_mrp_of_books}
+                    </p>
+                    <hr className="my-1 border-gray-300" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-900 text-xs">
+                      Discount
+                    </p>
+                    <p className="text-sm font-medium">{plan.discount}%</p>
+                    <hr className="my-1 border-gray-300" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-900 text-xs">
+                      Doorstep Delivery Charges
+                    </p>
+                    <p className="text-sm font-medium">
+                      {plan.doorstep_delivery_charge}
+                    </p>
+                    <hr className="my-1 border-gray-300" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-900 text-xs">
+                      Category
+                    </p>
+                    <p className="text-sm font-medium">{plan.category}</p>
+                    <hr className="my-1 border-gray-300" />
+                  </div>
+                </div>
+              </div>
 
-        <div className="mt-4 mb-4 text-center">
-          <button
-            onClick={() => handleChecklist(plan.brochure_name)} // Pass brochure name to handle checklist
-            className="bg-red-500 text-white py-2 px-4 rounded-md transition duration-300 hover:bg-red-600"
-          >
-            Check List
-          </button>
+              <div className="mt-4 mb-4 text-center">
+                <button
+                  onClick={() => handleChecklist(plan.brochure_name)} // Pass brochure name to handle checklist
+                  className="bg-red-500 text-white py-2 px-4 rounded-md transition duration-300 hover:bg-red-600"
+                >
+                  Check List
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
-    ))}
-  </div>
-</div>
 
       <Footer />
     </>

@@ -627,7 +627,7 @@ const ProductDetails1 = () => {
   const { authToken } = useAuth();
   const location = useLocation();
   const [showFullDescription, setShowFullDescription] = useState(false);
-  const hideActions = location.state?.hideActions || false;
+  const hideActions = false;
   const { cartItems, setCartItems } = useCart();
   useEffect(() => {
     const fetchBookDetails = async () => {

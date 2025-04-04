@@ -338,6 +338,8 @@ import Header from "../Header/Header";
 import Nav from "../Header/Nav";
 import Footer from "../Footer/Footer";
 import { useNavigate } from "react-router-dom";
+import Pagination from "../Pagination/Pagination";
+import { HashLoader } from "react-spinners";
 
 const CheckList = () => {
   const [books, setBooks] = useState([]); // All books fetched from the API
@@ -348,39 +350,31 @@ const CheckList = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [isSortOpen, setIsSortOpen] = useState(false);
-  const [selectedFilters, setSelectedFilters] = useState({});
+  const [selectedFilters, setSelectedFilters] = useState([]);
   const [sortBy, setSortBy] = useState("Select");
   const [isOpen, setIsOpen] = useState(false);
   const { authToken } = useAuth();
   const navigate = useNavigate();
+  const [categories,setCategories] =  useState([]);
 
-  const itemsPerPage = 10; // Number of books to display per page
 
   // Fetch all books from the API
   const fetchAllBooks = async () => {
     try {
       setLoading(true);
-      let allBooks = [];
-      let currentPage = 1;
-      let totalPages = 1;
 
-      // Fetch all pages of books
-      do {
-        const response = await axios.get(
+          console.log("====",selectedFilters);
+         const response = await axios.get(
           "https://bb.bechobookscan.com/api/premium-brochure-books",
-          { params: { page: currentPage } }
+          { params: { page: currentPage,category_names:selectedFilters,sort:sortBy } }
         );
-
-        const { data, pagination, total_price } = response.data;
-        allBooks = [...allBooks, ...data];
-        setTotalPrice(total_price || 0);
-        totalPages = pagination.last_page;
-        currentPage++;
-      } while (currentPage <= totalPages);
-
-      setBooks(allBooks);
-      setFilteredBooks(allBooks); // Initialize filteredBooks with all fetched data
-      setTotalPages(Math.ceil(allBooks.length / itemsPerPage)); // Calculate total pages based on itemsPerPage
+      
+          console.log(response.data)
+      setBooks(response.data.data);
+      setFilteredBooks(response.data.data); // Initialize filteredBooks with all fetched data
+      setTotalPages(response.data.pagination.last_page); // Calculate total pages based on itemsPerPage
+      setTotalPrice(response.data.total_price); // Calculate total pages based on itemsPerPage
+      setCategories(response.data.category_in_book);
     } catch (error) {
       console.error("Error fetching books:", error);
     } finally {
@@ -390,46 +384,39 @@ const CheckList = () => {
 
   useEffect(() => {
     fetchAllBooks();
-  }, []);
+  }, [currentPage,selectedFilters,sortBy]);
 
   // Apply filters and sorting whenever books, selectedFilters, or sortBy changes
-  useEffect(() => {
-    applyFiltersAndSorting();
-  }, [books, selectedFilters, sortBy]);
+  // useEffect(() => {
+  //   applyFiltersAndSorting();
+  // }, [books, selectedFilters, sortBy]);
 
   // Apply filters and sorting to the entire dataset
-  const applyFiltersAndSorting = () => {
-    let updatedBooks = [...books];
+  // const applyFiltersAndSorting = () => {
+  //   let updatedBooks = [...books];
 
-    // Apply filters
-    const activeFilters = Object.keys(selectedFilters).filter(
-      (key) => selectedFilters[key]
-    );
+  //   // Apply filters
+  //   const activeFilters = Object.keys(selectedFilters).filter(
+  //     (key) => selectedFilters[key]
+  //   );
 
-    if (activeFilters.length > 0) {
-      updatedBooks = updatedBooks.filter((book) =>
-        activeFilters.includes(book.category?.name || "")
-      );
-    }
+  //   if (activeFilters.length > 0) {
+  //     updatedBooks = updatedBooks.filter((book) =>
+  //       activeFilters.includes(book.category?.name || "")
+  //     );
+  //   }
 
-    // Apply sorting
-    if (sortBy === "Low to High") {
-      updatedBooks.sort((a, b) => (a.price || 0) - (b.price || 0));
-    } else if (sortBy === "High to Low") {
-      updatedBooks.sort((a, b) => (b.price || 0) - (a.price || 0));
-    }
+  //   // Apply sorting
+  //   if (sortBy === "Low to High") {
+  //     updatedBooks.sort((a, b) => (a.price || 0) - (b.price || 0));
+  //   } else if (sortBy === "High to Low") {
+  //     updatedBooks.sort((a, b) => (b.price || 0) - (a.price || 0));
+  //   }
 
-    setFilteredBooks(updatedBooks);
-    setTotalPages(Math.ceil(updatedBooks.length / itemsPerPage)); // Update total pages based on filtered books
-    setCurrentPage(1); // Reset to the first page after applying filters
-  };
-
-  // Update displayed books based on the current page
-  useEffect(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    setDisplayedBooks(filteredBooks.slice(startIndex, endIndex));
-  }, [filteredBooks, currentPage]);
+  //   // setFilteredBooks(updatedBooks);
+  //   // setTotalPages(Math.ceil(updatedBooks.length / itemsPerPage)); // Update total pages based on filtered books
+  //   // setCurrentPage(1); // Reset to the first page after applying filters
+  // };
 
   // Handle page change
   const handlePageChange = (page) => {
@@ -438,11 +425,6 @@ const CheckList = () => {
     }
   };
 
-  // Get unique categories for filters
-  const categories = [
-    ...new Set(books.map((bookItem) => bookItem.category?.name).filter(Boolean)),
-  ];
-
   // Toggle filter dropdown
   const handleToggle = () => {
     setIsOpen((prev) => !prev);
@@ -450,10 +432,9 @@ const CheckList = () => {
 
   // Toggle checkbox for filters
   const toggleCheckbox = (category) => {
-    setSelectedFilters((prevFilters) => ({
-      ...prevFilters,
-      [category]: !prevFilters[category],
-    }));
+    setSelectedFilters((prevFilters) => prevFilters.includes(category) ? prevFilters.filter((c)=> c != category) :
+      [...prevFilters , category]);
+      setIsOpen(false)
   };
 
   // Handle sort selection
@@ -512,7 +493,13 @@ const CheckList = () => {
     }
     return "Unknown";
   };
-
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <HashLoader color="#4A90E2" size={80} />
+      </div>
+    );
+  }
   return (
     <>
       <Header />
@@ -549,11 +536,11 @@ const CheckList = () => {
                     >
                       <input
                         type="checkbox"
-                        checked={selectedFilters[category] || false}
+                        checked={selectedFilters.includes(category)}
                         onChange={() => toggleCheckbox(category)}
                         className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                       />
-                      <span className="text-gray-700 capitalize">{category}</span>
+                      <span className="text-gray-700 capitalize">{category.length > 16 ? category.substring(0,15) +'...' : category}</span>
                     </label>
                   ))}
                 </div>
@@ -568,7 +555,7 @@ const CheckList = () => {
               onClick={handleToggleSort}
             >
               <span className="font-semibold text-gray-700">
-                Sort By : <span className="text-black font-bold">{sortBy}</span>
+                Sort By : <span className="text-black font-bold">{sortBy === 'low_to_high' ? 'Low To High' : sortBy === 'high_to_low'?'High To Low' : 'Select'}</span>
               </span>
               <span className="text-gray-600 text-sm ml-2">
                 {isSortOpen ? "▼" : "▲"}
@@ -588,7 +575,7 @@ const CheckList = () => {
                   >
                     Select
                   </div>
-                  {["Low to High", "High to Low"].map((option, index) => (
+                  {["low_to_high", "high_to_low"].map((option, index) => (
                     <div
                       key={index}
                       className={`cursor-pointer px-2 py-1 rounded ${
@@ -598,7 +585,7 @@ const CheckList = () => {
                       }`}
                       onClick={() => handleSortSelection(option)}
                     >
-                      {option}
+                    {option === 'low_to_high' ? 'Low To High' : 'High To Low'}
                     </div>
                   ))}
                 </div>
@@ -608,11 +595,11 @@ const CheckList = () => {
         </div>
       </div>
 
-      {displayedBooks.length === 0 ? (
+      {books.length === 0 ? (
         <p>No books available</p>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 p-8">
-          {displayedBooks.map((bookItem) => {
+          {books.map((bookItem) => {
             const { book, price, mrp } = bookItem;
             const bookImage = book?.image || "placeholder.jpg";
             const bookTitle = book?.title_long || "Unknown Title";
@@ -650,7 +637,7 @@ const CheckList = () => {
 
       {/* Pagination */}
       <div className="flex justify-center mt-4 space-x-2">
-        <button
+        {/* <button
           onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage === 1}
           className="bg-blue-500 text-white px-4 py-2 rounded disabled:opacity-50"
@@ -666,7 +653,12 @@ const CheckList = () => {
           className="bg-blue-500 text-white px-4 py-2 rounded disabled:opacity-50"
         >
           Next
-        </button>
+        </button> */}
+        <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        goToPage={handlePageChange}
+        />
       </div>
 
       {/* Summary */}

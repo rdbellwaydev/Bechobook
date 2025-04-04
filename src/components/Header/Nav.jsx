@@ -345,7 +345,7 @@ const Nav = () => {
             />
 
             {showDropdown && visibleResults.length > 0 && (
-              <ul className="absolute bg-white border border-gray-300 mt-1 w-[250px] max-h-[250px] overflow-y-auto shadow-lg rounded">
+              <ul className="absolute bg-white  mt-1 w-[300px] max-h-[300px] overflow-y-auto shadow-lg rounded">
                 {visibleResults.map((book, index) => (
                   <li
                     key={index}
@@ -384,10 +384,13 @@ const Nav = () => {
             </Link>
           </div> */}
           <div className="flex gap-2">
-            <Link to="/login">
+            {!localStorage.getItem("authtoken") ?(<Link to="/login">
               <i className="ri-user-community-fill"></i>
               <span>Sign in</span>
-            </Link>
+            </Link>) :(<Link to='/profile' style={{backgroundColor:'#f0f0f0' , borderRadius:'10px' ,padding:'5px', border: '1px solid #ddd'}}>
+    <i className="ri-user-3-fill"></i>
+</Link>)}
+            
             {!localStorage.getItem("authtoken") && (
               <Link to="/signup">
                 <span> or Sign Up</span>

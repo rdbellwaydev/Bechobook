@@ -412,17 +412,17 @@ const handleAddToCart = async (product) => {
       return;
     }
   
-    // Check if the product is already in the cart
-    const isProductInCart = cartItems.some((item) => item.book_id === product.id);
+    // // Check if the product is already in the cart
+    // const isProductInCart = cartItems.some((item) => item.book_id === product.id);
   
-    if (isProductInCart) {
-      Swal.fire({
-        icon: "warning",
-        title: "Already in Cart",
-        text: "This book is already in your cart!",
-      });
-      return;
-    }
+    // if (isProductInCart) {
+    //   Swal.fire({
+    //     icon: "warning",
+    //     title: "Already in Cart",
+    //     text: "This book is already in your cart!",
+    //   });
+    //   return;
+    // }
   
     try {
       const response = await fetch("https://bb.bechobookscan.com/api/addToCart", {
