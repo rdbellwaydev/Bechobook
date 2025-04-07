@@ -303,7 +303,8 @@ const navigate = useNavigate();
     setSelectedFilters((prevCategory)=> prevCategory.includes(category) ? prevCategory.filter((c) => c != category) :
          [...prevCategory , category]
       );
-      setIsOpen(false)
+      setIsOpen(false);
+      setCurrentPage(1)
   };
 
   const handleSortSelection = (option) => {

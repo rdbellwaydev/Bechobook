@@ -588,6 +588,7 @@ const CheckList = () => {
     setSelectedFilters((prevFilters) => prevFilters.includes(category) ? prevFilters.filter((c)=> c != category) :
       [...prevFilters , category]);
       setIsOpen(false)
+      setCurrentPage(1)
   };
 
   const handleSortSelection = (option) => {

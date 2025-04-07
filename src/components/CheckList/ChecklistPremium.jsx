@@ -434,7 +434,8 @@ const CheckList = () => {
   const toggleCheckbox = (category) => {
     setSelectedFilters((prevFilters) => prevFilters.includes(category) ? prevFilters.filter((c)=> c != category) :
       [...prevFilters , category]);
-      setIsOpen(false)
+      setIsOpen(false);
+      setCurrentPage(1)
   };
 
   // Handle sort selection

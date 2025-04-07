@@ -72,6 +72,7 @@ const CheckList = () => {
          [...prevCategory , category]
       );
       setIsOpen(false)
+      setCurrentPage(1)
   };
 
   const handleSortSelection = (option) => {
