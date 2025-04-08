@@ -453,7 +453,14 @@ const CheckList = () => {
   // Handle contact us (checkout)
   const handleContactUs = async () => {
     if (!authToken) {
-      Swal.fire("Error", "You are not authenticated. Please log in.", "error");
+      Swal.fire({
+             icon: "error",
+             text: "Please Log in first!",
+           }).then((result) => {
+             if (result.isConfirmed) {
+               navigate('/login');
+             }
+           });
       return;
     }
 
@@ -675,7 +682,7 @@ const CheckList = () => {
         </div>
         <button
           onClick={handleContactUs}
-          className="mt-4 w-full bg-orange-500 text-white py-2 rounded-md transition duration-300"
+          className="mt-4 w-full bg-black text-white py-2 rounded-md transition duration-300"
         >
           Proceed to Checkout
         </button>

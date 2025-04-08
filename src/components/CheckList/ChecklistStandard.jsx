@@ -604,7 +604,14 @@ const CheckList = () => {
 
   const handleContactUs = async () => {
     if (!authToken) {
-      Swal.fire("Error", "You are not authenticated. Please log in.", "error");
+      Swal.fire({
+        icon: "error",
+        text: "Please Log in first!",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          navigate('/login');
+        }
+      });
       return;
     }
 
@@ -815,7 +822,7 @@ const CheckList = () => {
       </div>
 
       {/* Summary */}
-      <div className="max-w-sm mx-auto p-6 bg-white shadow-md rounded-md mt-6">
+      <div className="max-w-sm mx-auto p-6 bg-white shadow-md rounded-md mt-6 mb-2">
         <div className="flex justify-between py-2 border-b">
           <span className="text-gray-700">Subtotal</span>
           {/* <span className="text-gray-700">₹{totalPrice}</span> */}
@@ -828,7 +835,7 @@ const CheckList = () => {
         </div>
         <button
           onClick={handleContactUs}
-          className="mt-4 w-full bg-orange-500 text-white py-2 rounded-md transition duration-300"
+          className="mt-4 w-full bg-black text-white py-2 rounded-md transition duration-300"
         >
           Proceed to Checkout
         </button>

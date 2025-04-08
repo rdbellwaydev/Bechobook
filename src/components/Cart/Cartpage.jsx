@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import HashLoader from "react-spinners/HashLoader";
 import { Base_url } from '../ApiController/ApiController';
+import Pagination from '../Pagination/Pagination';
 const ProductGrid = () => {
   const { authToken } = useAuth();
   const navigate = useNavigate();
@@ -80,7 +81,7 @@ const handleQuantityChange = async (productId, change) => {
   setTotalPrice(calculateTotalPrice(updatedCartItems));
 
   try {
-    await fetch(`https://bb.bechobookscan.com/api/updateCart/${productId}`, {
+    await fetch(`${Base_url}api/updateCart/${productId}`, {
       method: "PUT",
       headers: {
         Authorization: `Bearer ${authToken}`,
@@ -110,7 +111,7 @@ const handleCheckout = async () => {
   console.log("Checkout Payload:", JSON.stringify(orderPayload, null, 2)); // Debugging log
 
   try {
-      const response = await fetch("https://bb.bechobookscan.com/api/createOrder", {
+      const response = await fetch(Base_url+"createOrder", {
           method: "POST",
           headers: {
                     Authorization: `Bearer ${authToken}`,
@@ -147,7 +148,7 @@ const handleCheckout = async () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          const response = await fetch(`https://bb.bechobookscan.com/api/cart/${id}`, {
+          const response = await fetch(`${Base_url}api/cart/${id}`, {
             method: "DELETE",
             headers: {
               Authorization: `Bearer ${authToken}`,
@@ -298,19 +299,26 @@ const handleCheckout = async () => {
           ))}
         </div>
         {/* Pagination Controls */}
-        <div className="flex justify-center mt-6">
+        {/* <div className="flex justify-center mt-6">
           {Array.from({ length: totalPages }, (_, index) => (
             <button
               key={index + 1}
               onClick={() => handlePageChange(index + 1)}
               className={`mx-1 px-4 py-2 rounded ${currentPage === index + 1
-                ? 'bg-orange-500 text-white'
+                ? 'bg-black text-white'
                 : 'bg-gray-200 text-gray-700'
                 }`}
             >
               {index + 1}
             </button>
           ))}
+        </div> */}
+         <div className="flex justify-center mt-6">
+        <Pagination
+        totalPages={totalPages}
+        currentPage={currentPage}
+        goToPage={handlePageChange}
+        />
         </div>
         <div className="max-w-sm mx-auto p-6 bg-white shadow-md rounded-md mt-6">
           <div className="flex justify-between py-2 border-b">
@@ -323,7 +331,7 @@ const handleCheckout = async () => {
             {/* <span className="text-gray-700">₹{totalPrice}</span> */}
             <span className="text-gray-700">₹{parseFloat(totalPrice).toFixed(2)}</span>
           </div>
-          <button onClick={handleCheckout} className="mt-4 w-full bg-orange-500 text-white py-2 rounded-md transition duration-300">
+          <button onClick={handleCheckout} className="mt-4 w-full bg-black text-white py-2 rounded-md transition duration-300">
             Proceed to Checkout
           </button>
         </div>

@@ -34,7 +34,7 @@ const Pagination = ({ totalPages, currentPage, goToPage }) => {
             onClick={() => goToPage(page)}
             className={`px-3 py-2 rounded-md ${
               currentPage === page
-                ? "bg-blue-500 text-white font-bold"
+                ? "bg-black text-white font-bold"
                 : "bg-gray-200 text-gray-700 hover:bg-gray-300"
             }`}
           >
