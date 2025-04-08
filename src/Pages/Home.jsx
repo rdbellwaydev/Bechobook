@@ -32,6 +32,7 @@ import { useAuth } from "../components/Authentication/AuthContext";
 import { useCart } from "../components/CartContext";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import { Base_url } from "../components/ApiController/ApiController";
 const Home = () => {
   const navigate = useNavigate();
   const cardDetails = [
@@ -151,7 +152,7 @@ const Home = () => {
   
       try {
         const response = await fetch(
-          `https://bb.bechobookscan.com/api/getCart?page=${currentPage}`,
+          `${Base_url}getCart?page=${currentPage}`,
           {
             headers: { Authorization: `Bearer ${authToken}` },
           }
@@ -183,7 +184,7 @@ const Home = () => {
     const fetchBooks = async () => {
       try {
         const response = await fetch(
-          `https://bb.bechobookscan.com/api/getBooksByCatalog?catalogs=${categoryMap[activeCategory]}`,
+          `${Base_url}getBooksByCatalog?catalogs=${categoryMap[activeCategory]}`,
           {
             method: "GET",
             headers: {
@@ -220,7 +221,7 @@ const Home = () => {
     // Fetch categories from API
     const fetchCategories = async () => {
       try {
-        const response = await fetch("https://bb.bechobookscan.com/api/getCategory");
+        const response = await fetch(Base_url+"getCategory");
         const data = await response.json();
         if (data.status) {
           setCategories(data.data);
@@ -305,7 +306,7 @@ const Home = () => {
       try {
         // Fetch Left Banner
         const leftResponse = await axios.get(
-          "https://bb.bechobookscan.com/api/getLeftBanner"
+          Base_url+"getLeftBanner"
         );
         if (leftResponse.data.status && leftResponse.data.data.length > 0) {
           setLeftBanner(leftResponse.data.data[0].image);
@@ -313,7 +314,7 @@ const Home = () => {
 
         // Fetch Right Banner
         const rightResponse = await axios.get(
-          "https://bb.bechobookscan.com/api/getRightBanner"
+          Base_url+"getRightBanner"
         );
         if (rightResponse.data.status && rightResponse.data.data.length > 0) {
           setRightBanner(rightResponse.data.data[0].image);
@@ -330,7 +331,7 @@ const Home = () => {
     const fetchLeftBanner = async () => {
       try {
         const response = await axios.get(
-          "https://bb.bechobookscan.com/api/getLeftBanner"
+          Base_url+"getLeftBanner"
         );
         if (response.data.status && response.data.data.length > 0) {
           setLeftBanner(response.data.data[0].image);
@@ -425,7 +426,7 @@ const handleAddToCart = async (product) => {
     // }
   
     try {
-      const response = await fetch("https://bb.bechobookscan.com/api/addToCart", {
+      const response = await fetch(Base_url+"addToCart", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -469,7 +470,7 @@ const handleAddToCart = async (product) => {
   useEffect(() => {
     const fetchDiscountedBooks = async () => {
       try {
-        const response = await fetch("https://bb.bechobookscan.com/api/getAllDiscountedBooks");
+        const response = await fetch(Base_url+"getAllDiscountedBooks");
         const data = await response.json();
 
         if (data.status && data.data) {
@@ -497,7 +498,7 @@ const handleAddToCart = async (product) => {
   useEffect(() => {
     const fetchBestSellingBooks = async () => {
       try {
-        const response = await fetch("https://bb.bechobookscan.com/api/getBestSellingBooks");
+        const response = await fetch(Base_url+"getBestSellingBooks");
         const data = await response.json();
 
         if (data.status && data.data) {

@@ -23,6 +23,7 @@
 // export default Banner1
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { Base_url } from "../ApiController/ApiController";
 
 const Banner1 = () => {
   const [bannerImage, setBannerImage] = useState("");
@@ -30,7 +31,7 @@ const Banner1 = () => {
   useEffect(() => {
     const fetchBanner = async () => {
       try {
-        const response = await axios.get("https://bb.bechobookscan.com/api/getBanner");
+        const response = await axios.get(Base_url+"getBanner");
 
         if (response.data.status && response.data.data.length > 0) {
           setBannerImage(response.data.data[0].image); // Set first banner image

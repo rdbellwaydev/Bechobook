@@ -340,6 +340,7 @@ import Footer from "../Footer/Footer";
 import { useNavigate } from "react-router-dom";
 import Pagination from "../Pagination/Pagination";
 import { HashLoader } from "react-spinners";
+import { Base_url } from "../ApiController/ApiController";
 
 const CheckList = () => {
   const [books, setBooks] = useState([]); // All books fetched from the API
@@ -365,7 +366,7 @@ const CheckList = () => {
 
           console.log("====",selectedFilters);
          const response = await axios.get(
-          "https://bb.bechobookscan.com/api/premium-brochure-books",
+          Base_url+"premium-brochure-books",
           { params: { page: currentPage,category_names:selectedFilters,sort:sortBy } }
         );
       
@@ -458,7 +459,7 @@ const CheckList = () => {
 
     try {
       const response = await axios.post(
-        "https://bb.bechobookscan.com/api/createQuotation",
+        Base_url+"createQuotation",
         {
           brochure_type: "premium",
         },

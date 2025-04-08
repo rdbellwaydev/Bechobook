@@ -186,6 +186,7 @@ import Nav from '../Header/Nav';
 import Footer from '../Footer/Footer';
 import Swal from "sweetalert2";
 import { FaEye, FaEyeSlash } from "react-icons/fa"; // Import icons
+import { Base_url } from '../ApiController/ApiController';
 const MeetingRequestForm = () => {
   const [formData, setFormData] = useState({
     name: '',
@@ -245,7 +246,7 @@ const MeetingRequestForm = () => {
 
     try {
       const response = await axios.post(
-        "https://bb.bechobookscan.com/api/user_register",
+        Base_url+"user_register",
         formData
       );
 

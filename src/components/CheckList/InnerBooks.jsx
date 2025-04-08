@@ -617,6 +617,7 @@ import HashLoader from "react-spinners/HashLoader";
 import Swal from "sweetalert2";
 import { useLocation } from "react-router-dom";
 import { useCart } from "../CartContext";
+import { Base_url } from "../ApiController/ApiController";
 
 const ProductDetails1 = () => {
   const { isbn13 } = useParams(); // Get ISBN from URL
@@ -633,7 +634,7 @@ const ProductDetails1 = () => {
     const fetchBookDetails = async () => {
       try {
         const response = await fetch(
-          `https://bb.bechobookscan.com/api/getBookByISBN?isbn13=${isbn13}`
+          `${Base_url}getBookByISBN?isbn13=${isbn13}`
         );
         const data = await response.json();
 
@@ -858,7 +859,7 @@ const handleAddToCart = async () => {
   }
 
   try {
-    const response = await fetch("https://bb.bechobookscan.com/api/addToCart", {
+    const response = await fetch(Base_url+"addToCart", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -924,7 +925,7 @@ const handleAddToCart = async () => {
     }
 
     try {
-      const response = await fetch("https://bb.bechobookscan.com/api/addToWishlist", {
+      const response = await fetch(Base_url+"addToWishlist", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

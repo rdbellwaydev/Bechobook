@@ -5,6 +5,7 @@ import Header from '../Header/Header';
 import Nav from '../Header/Nav';
 import Footer from '../Footer/Footer';
 import { useAuth } from '../Authentication/AuthContext';
+import { Base_url } from '../ApiController/ApiController';
 
 const ProfilePage = () => {
   const [userProfile, setUserProfile] = useState(null);
@@ -24,7 +25,7 @@ const ProfilePage = () => {
       }
 
       try {
-        const response = await axios.get('https://bb.bechobookscan.com/api/getProfile', {
+        const response = await axios.get(Base_url+'getProfile', {
           headers: { Authorization: `Bearer ${authToken}` },
         });
 

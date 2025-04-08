@@ -52,6 +52,7 @@
 // export default Video
 
 import React, { useState, useRef, useEffect } from "react";
+import { Base_url } from "../ApiController/ApiController";
 
 const Video = () => {
   const videoRef = useRef(null); // Reference to the video element
@@ -61,7 +62,7 @@ const Video = () => {
   useEffect(() => {
     const fetchVideo = async () => {
       try {
-        const response = await fetch("https://bb.bechobookscan.com/api/getVideo");
+        const response = await fetch(Base_url+"getVideo");
         const data = await response.json();
         if (data.status && data.data.length > 0) {
           setVideoSrc(data.data[0].video);

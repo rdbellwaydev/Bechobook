@@ -1,14 +1,16 @@
 import axios from "axios";
 
+export const Base_url =   'https://admin.bechobook.com/api/'; //'https://bb.bechobookscan.com/api/';
+ 
 export const useBrochureService = () => {
     // Base URL for the API
-    const ApiBaseUrl = "https://bb.bechobookscan.com/api/";
+    // const ApiBaseUrl = "https://bb.bechobookscan.com/api/";
 
     const token = localStorage.getItem("authtoken");
   
     // Axios instance with the token
     const Api = axios.create({
-      baseURL: ApiBaseUrl,
+      baseURL: Base_url,
       headers: {
         "Content-Type": "multipart/form-data",
         Accept: "application/json",

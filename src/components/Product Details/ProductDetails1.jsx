@@ -332,6 +332,7 @@ import { useAuth } from "../Authentication/AuthContext";
 import HashLoader from "react-spinners/HashLoader";
 import { useCart } from "../CartContext";
 import Swal from "sweetalert2";
+import { Base_url } from "../ApiController/ApiController";
 const InnerBooks = () => {
   const { id } = useParams(); // Get dynamic ID from the URL
   const navigate = useNavigate();
@@ -361,7 +362,7 @@ const { cartItems, setCartItems } = useCart();
   useEffect(() => {
     const fetchBookDetails = async () => {
       try {
-        const response = await fetch(`https://bb.bechobookscan.com/api/getBookById/${id}`);
+        const response = await fetch(`${Base_url}getBookById/${id}`);
         const data = await response.json();
         if (data.status && data.data) {
           setProduct(data.data);
@@ -382,7 +383,7 @@ const { cartItems, setCartItems } = useCart();
   useEffect(() => {
     const fetchRelatedProducts = async () => {
       try {
-        const response = await fetch(`https://bb.bechobookscan.com/api/getSimilarBooks?book_id=${id}`);
+        const response = await fetch(`${Base_url}getSimilarBooks?book_id=${id}`);
         const data = await response.json();
         if (data.status && data.data) {
           setRelatedProducts(data.data);
@@ -490,7 +491,7 @@ const handleAddToCart = async (product) => {
     }
   
     try {
-      const response = await fetch("https://bb.bechobookscan.com/api/addToCart", {
+      const response = await fetch(Base_url+"addToCart", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -559,7 +560,7 @@ const handleAddToCart = async (product) => {
     }
 
     try {
-      const response = await fetch("https://bb.bechobookscan.com/api/addToWishlist", {
+      const response = await fetch(Base_url+"addToWishlist", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

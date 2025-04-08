@@ -9,6 +9,7 @@ import { useAuth } from '../Authentication/AuthContext';
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import HashLoader from "react-spinners/HashLoader";
+import { Base_url } from '../ApiController/ApiController';
 const ProductGrid = () => {
   const { authToken } = useAuth();
   const navigate = useNavigate();
@@ -32,7 +33,7 @@ useEffect(() => {
 
     try {
       const response = await fetch(
-        `https://bb.bechobookscan.com/api/getCart?page=${currentPage}`,
+        `${Base_url}getCart?page=${currentPage}`,
         { headers: { Authorization: `Bearer ${authToken}` } }
       );
 

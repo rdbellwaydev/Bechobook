@@ -547,6 +547,7 @@ import { useAuth } from "../Authentication/AuthContext";
 import Swal from "sweetalert2";
 import HashLoader from "react-spinners/HashLoader";
 import { useCart } from "../CartContext";
+import { Base_url } from "../ApiController/ApiController";
 
 const CategoryPage = () => {
   const { id } = useParams();
@@ -669,7 +670,7 @@ useEffect(() => {
 
     try {
       // Fetch the first page
-      const firstPageResponse = await fetch(`https://bb.bechobookscan.com/api/getBooksByCategory?category_id=${id}&page=1`);
+      const firstPageResponse = await fetch(`${Base_url}getBooksByCategory?category_id=${id}&page=1`);
       const firstPageData = await firstPageResponse.json();
 
       if (firstPageData.status) {
@@ -684,7 +685,7 @@ useEffect(() => {
         const fetchPromises = [];
         for (let page = 2; page <= firstPageData.pagination.total_pages; page++) {
           fetchPromises.push(
-            fetch(`https://bb.bechobookscan.com/api/getBooksByCategory?category_id=${id}&page=${page}`)
+            fetch(`${Base_url}getBooksByCategory?category_id=${id}&page=${page}`)
               .then((res) => res.json())
           );
         }
@@ -790,7 +791,7 @@ const handlePageChange = (newPage) => {
     }
   
     try {
-      const response = await fetch("https://bb.bechobookscan.com/api/addToCart", {
+      const response = await fetch(Base_url+"addToCart", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

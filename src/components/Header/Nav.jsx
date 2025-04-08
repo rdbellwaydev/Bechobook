@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import "remixicon/fonts/remixicon.css";
 import { useNavigate } from "react-router-dom";
 import Logo from "../../assets/Home/bechobook.png"
+import { Base_url } from "../ApiController/ApiController";
 const CHUNK_SIZE = 100; // Load results in batches of 100
 
 const Nav = () => {
@@ -50,7 +51,7 @@ const Nav = () => {
 
     try {
       const response = await fetch(
-        `https://bb.bechobookscan.com/api/SearchBooks?search=${searchTerm}`
+        `${Base_url}SearchBooks?search=${searchTerm}`
       );
       const data = await response.json();
 
@@ -88,7 +89,7 @@ const Nav = () => {
     // Fetch categories from API
     const fetchCategories = async () => {
       try {
-        const response = await fetch("https://bb.bechobookscan.com/api/getCategory");
+        const response = await fetch(Base_url+"getCategory");
         const data = await response.json();
         if (data.status) {
           setCategories(data.data); // Set categories
@@ -106,7 +107,7 @@ const Nav = () => {
     // Fetch categories from API
     const fetchCatalogs = async () => {
       try {
-        const response = await fetch("https://bb.bechobookscan.com/api/getCatalog");
+        const response = await fetch(Base_url+"getCatalog");
         const data = await response.json();
         if (data.status) {
           setCatalogs(data.data); // Set categories

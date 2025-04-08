@@ -9,6 +9,7 @@ import Footer from "../Footer/Footer";
 import { useNavigate } from "react-router-dom";
 import Pagination from "../Pagination/Pagination";
 import { HashLoader } from "react-spinners";
+import { Base_url } from "../ApiController/ApiController";
 const CheckList = () => {
   const [books, setBooks] = useState([]);
   const [totalPrice, setTotalPrice] = useState(0);
@@ -28,7 +29,7 @@ const CheckList = () => {
       console.log("=====",sortBy);
       setLoading(true);
       const response = await axios.get(
-        "https://bb.bechobookscan.com/api/average-brochure-books",
+        Base_url + "average-brochure-books",
         { params: { page,category_names:selectedFilters,sort:sortBy } }
       );
 
@@ -99,7 +100,7 @@ const CheckList = () => {
 
     try {
       const response = await axios.post(
-        "https://bb.bechobookscan.com/api/createQuotation",
+        Base_url + "createQuotation",
         {
           brochure_type: "average",
         },

@@ -7,6 +7,7 @@ import HashLoader from "react-spinners/HashLoader";
 import Swal from "sweetalert2";
 import { useAuth } from "../Authentication/AuthContext";
 import { useCart } from "../CartContext";
+import { Base_url } from "../ApiController/ApiController";
 const CatalogBooks = () => {
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -112,7 +113,7 @@ const CatalogBooks = () => {
     
         try {
           const response = await fetch(
-            `https://bb.bechobookscan.com/api/getCart?page=${currentPage}`,
+            `${Base_url}getCart?page=${currentPage}`,
             {
               headers: { Authorization: `Bearer ${authToken}` },
             }
@@ -170,7 +171,7 @@ const CatalogBooks = () => {
             }
           
             try {
-              const response = await fetch("https://bb.bechobookscan.com/api/addToCart", {
+              const response = await fetch(Base_url+"addToCart", {
                 method: "POST",
                 headers: {
                   "Content-Type": "application/json",
@@ -216,7 +217,7 @@ const CatalogBooks = () => {
       setLoading(true);
       console.log("Fetching books from API...");
 
-      const response = await fetch("https://bb.bechobookscan.com/api/getBooksByCatalog?catalogs=most_viewed", {
+      const response = await fetch(Base_url+"getBooksByCatalog?catalogs=most_viewed", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
