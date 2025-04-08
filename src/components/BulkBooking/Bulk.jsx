@@ -409,7 +409,7 @@ const BulkBookingPage = () => {
 
   const gradients = {
     Average: "bg-gradient-to-r from-blue-500 to-indigo-500",
-    Standard: "bg-gradient-to-r from-red-500 to-orange-500",
+    Standard: "bg-gradient-to-r from-[#39006f] to-purple-700",
     Premium: "bg-gradient-to-r from-purple-500 to-pink-500",
     "Basic Lite": "bg-gradient-to-r from-blue-500 to-indigo-500",
     Basic: "bg-gradient-to-r from-red-500 to-orange-500",
