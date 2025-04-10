@@ -81,7 +81,7 @@ const handleQuantityChange = async (productId, change) => {
   setTotalPrice(calculateTotalPrice(updatedCartItems));
 
   try {
-    await fetch(`${Base_url}api/updateCart/${productId}`, {
+    await fetch(`${Base_url}updateCart/${productId}`, {
       method: "PUT",
       headers: {
         Authorization: `Bearer ${authToken}`,
@@ -148,7 +148,7 @@ const handleCheckout = async () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          const response = await fetch(`${Base_url}api/cart/${id}`, {
+          const response = await fetch(`${Base_url}cart/${id}`, {
             method: "DELETE",
             headers: {
               Authorization: `Bearer ${authToken}`,

@@ -327,7 +327,7 @@ import Header from "../Header/Header";
 import Nav from "../Header/Nav";
 import Footer from "../Footer/Footer";
 import { useNavigate } from "react-router-dom";
-import { useBrochureService } from "../ApiController/ApiController";
+import { Base_url, useBrochureService } from "../ApiController/ApiController";
 import HashLoader from "react-spinners/HashLoader";
 
 const BulkBookingPage = () => {
@@ -366,6 +366,8 @@ const BulkBookingPage = () => {
 
     fetchBrochures();
   }, []);
+
+
 
   // Modified handleChecklist function to handle different brochure types
   const handleChecklist = async (brochureName) => {
@@ -423,6 +425,8 @@ const BulkBookingPage = () => {
     );
   }
   if (error) return <p>Error: {error}</p>;
+
+
 
   return (
     <>
