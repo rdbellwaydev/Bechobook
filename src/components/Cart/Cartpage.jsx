@@ -63,21 +63,19 @@ const calculateTotalPrice = (items) => {
 };
 
 const handleQuantityChange = async (productId, change) => {
-  const updatedCartItems = cartItems.map((item) => {
-    if (item.id === productId) {
-      const newQuantity = item.quantity + change;
-      if (newQuantity > item.stocks) {
-        Swal.fire({
-          icon: "warning",
-          title: "Stock Limit Reached",
-          text: `Only ${item.stocks} available in stock!`,
-        });
-        return item;
-      }
-      return { ...item, quantity: Math.max(1, newQuantity) };
-    }
-    return item;
-  });
+  const currentItem  = cartItems.find((item)=> item.id === productId);
+  const newQuantity = currentItem.quantity + change;
+  if (newQuantity > currentItem.stocks) {
+    Swal.fire({
+      icon: "warning",
+      title: "Stock Limit Reached",
+      text: `Only ${currentItem.stocks} available in stock!`,
+    });
+    return;
+  }
+
+  const updatedCartItems = cartItems.map((item) => item.id === productId ? { ...item, quantity: Math.max(1, newQuantity) }:item
+  );
 
   setCartItems(updatedCartItems);
   
@@ -92,7 +90,7 @@ const handleQuantityChange = async (productId, change) => {
       body: JSON.stringify({ quantity: updatedCartItems.find((item) => item.id === productId).quantity,items : updatedCartItems }),
     });
     const data =  await response.json();
-    console.log(data)
+    console.log(data.status)
     if(data.status === true){
 
       fetchCartData();
