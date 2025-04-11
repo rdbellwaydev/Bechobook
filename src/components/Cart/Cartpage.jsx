@@ -44,7 +44,7 @@ const ProductGrid = () => {
       setCategoryCount(data.category_count);
       setTotalBooks(data.pagination.total);
       setTotalPages(data.pagination?.last_page ?? 1);
-      setTotalPrice(data.total_price ?? calculateTotalPrice(data.data));
+      setTotalPrice(data.total_price);
     } catch (error) {
       console.error("Error fetching cart data:", error);
     } finally {
@@ -65,6 +65,7 @@ const calculateTotalPrice = (items) => {
 const handleQuantityChange = async (productId, change) => {
   const currentItem  = cartItems.find((item)=> item.id === productId);
   const newQuantity = currentItem.quantity + change;
+  const unitPrice =  currentItem.price / currentItem.quantity;
   if (newQuantity > currentItem.stocks) {
     Swal.fire({
       icon: "warning",
@@ -73,9 +74,15 @@ const handleQuantityChange = async (productId, change) => {
     });
     return;
   }
-
-  const updatedCartItems = cartItems.map((item) => item.id === productId ? { ...item, quantity: Math.max(1, newQuantity) }:item
+  let updatedCartItems;
+  console.log("=========",newQuantity < currentItem.quantity)
+  if(newQuantity < currentItem.quantity){
+    updatedCartItems = cartItems.map((item) => item.id === productId ? { ...item, quantity: Math.max(1, newQuantity) ,price : unitPrice* newQuantity }:item)
+  }else{
+    updatedCartItems = cartItems.map((item) => item.id === productId ? { ...item, quantity: Math.max(1, newQuantity) ,price : unitPrice * newQuantity }:item
   );
+  }
+    
 
   setCartItems(updatedCartItems);
   
@@ -278,10 +285,10 @@ const handleCheckout = async () => {
                   ₹{product.msrp}
                 </span> */}
                 <span className="text-lg font-bold text-green-600">
-              ₹{(product.price * product.quantity).toFixed(2)}
+              ₹{product.price}
             </span>
             <span className="text-sm text-orange-400 line-through">
-              ₹{(product.msrp * product.quantity).toFixed(2)}
+              ₹{product.msrp}
             </span>
               </div>
               <div className="flex items-center mt-2 bg-gray-100 rounded-full px-2 py-1 shadow">
