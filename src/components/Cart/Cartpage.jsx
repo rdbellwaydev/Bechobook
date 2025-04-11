@@ -23,7 +23,6 @@ const ProductGrid = () => {
   const [totalSubtotal, setTotalSubtotal] = useState(0);
   const [updatedCart, setUpdatedCart] = useState({});
   const [totalBooks, setTotalBooks] = useState(0);
-useEffect(() => {
   const fetchCartData = async () => {
     if (!authToken) {
       console.warn("Auth Token is missing!");
@@ -52,11 +51,14 @@ useEffect(() => {
       setLoading(false);
     }
   };
+useEffect(() => {
+ 
 
   fetchCartData();
 }, [authToken, currentPage]);
 
 const calculateTotalPrice = (items) => {
+  console.log(items);
   return items.reduce((acc, item) => acc + item.price * item.quantity, 0);
 };
 
@@ -78,17 +80,23 @@ const handleQuantityChange = async (productId, change) => {
   });
 
   setCartItems(updatedCartItems);
-  setTotalPrice(calculateTotalPrice(updatedCartItems));
+  
 
   try {
-    await fetch(`${Base_url}updateCart/${productId}`, {
+   const response =  await fetch(`${Base_url}updateCart/${productId}`, {
       method: "PUT",
       headers: {
         Authorization: `Bearer ${authToken}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ quantity: updatedCartItems.find((item) => item.id === productId).quantity }),
+      body: JSON.stringify({ quantity: updatedCartItems.find((item) => item.id === productId).quantity,items : updatedCartItems }),
     });
+    const data =  await response.json();
+    console.log(data)
+    if(data.status === true){
+
+      fetchCartData();
+    }
   } catch (error) {
     console.error("Error updating cart:", error);
   }

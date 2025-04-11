@@ -108,6 +108,7 @@ import Swal from "sweetalert2";
 import { useAuth } from "../components/Authentication/AuthContext";
 import HashLoader from "react-spinners/HashLoader";
 import { useCart } from "../components/CartContext";
+import { Base_url } from "../components/ApiController/ApiController";
 const ProductPage = () => {
   const [wishlist, setWishlist] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -176,7 +177,7 @@ const { cartItems, setCartItems } = useCart();
     
         try {
           const response = await fetch(
-            `https://bb.bechobookscan.com/api/getCart?page=${currentPage}`,
+            `${Base_url}getCart?page=${currentPage}`,
             {
               headers: { Authorization: `Bearer ${authToken}` },
             }
@@ -208,7 +209,7 @@ const { cartItems, setCartItems } = useCart();
     const fetchWishlist = async () => {
       try {
         const response = await fetch(
-          `https://bb.bechobookscan.com/api/getWishlist?page=${currentPage}`, // Add page parameter if needed
+          `${Base_url}getWishlist?page=${currentPage}`, // Add page parameter if needed
           {
             headers: {
               Authorization: `Bearer ${authToken}`,
@@ -353,7 +354,7 @@ const { cartItems, setCartItems } = useCart();
     try {
       console.log("Adding to cart:", product);
   
-      const response = await fetch("https://bb.bechobookscan.com/api/addToCart", {
+      const response = await fetch(Base_url+"addToCart", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -407,7 +408,7 @@ const { cartItems, setCartItems } = useCart();
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          const response = await fetch(`https://bb.bechobookscan.com/api/deleteWishlist/${id}`, {
+          const response = await fetch(`${Base_url}deleteWishlist/${id}`, {
             method: "DELETE",
             headers: {
               Authorization: `Bearer ${authToken}`,
