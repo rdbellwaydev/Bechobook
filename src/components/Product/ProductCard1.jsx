@@ -1,5 +1,5 @@
 import React from "react";
-
+import bookError  from '../../assets/bookError.png'
 
 const ProductCard1 = ({ img, title, desc, currentprice, mrp, discount }) => {
   return (
@@ -8,7 +8,7 @@ const ProductCard1 = ({ img, title, desc, currentprice, mrp, discount }) => {
       <div className="h-[52vh] w-full overflow-hidden ">
         <img
           className="w-full h-full scale-x-150  "
-          src={img}
+          src={img || bookError}
           alt={title}
         />
       </div>

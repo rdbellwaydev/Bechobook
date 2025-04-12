@@ -1,10 +1,10 @@
 import React from 'react'
-
+import bookError  from '../../assets/bookError.png'
 const ProductCard3 = ({ img, title, desc, currentprice, mrp, discount }) => {
   return (
       <div className="h-[70vh] w-full ">
       <div className="h-[52vh] w-full overflow-hidden">
-        <img className="w-full h-full scale-x-150" src={img} alt={title} />
+        <img className="w-full h-full scale-x-150" src={img || bookError} alt={title} />
       </div>
       <div className="flex justify-between items-center px-2 my-4">
         <h4 className="text-md font-semibold">{title}</h4>

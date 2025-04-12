@@ -333,6 +333,7 @@ import HashLoader from "react-spinners/HashLoader";
 import { useCart } from "../CartContext";
 import Swal from "sweetalert2";
 import { Base_url } from "../ApiController/ApiController";
+import bookError  from '../../assets/bookError.png';
 const InnerBooks = () => {
   const { id } = useParams(); // Get dynamic ID from the URL
   const navigate = useNavigate();
@@ -757,7 +758,7 @@ const handleAddToCart = async (product) => {
               {/* Image */}
               <div className="w-full">
                 <img
-                  src={product.book.image || "https://via.placeholder.com/150"}
+                  src={product.book.image || bookError}
                   alt={product.book.title}
                   className="w-full aspect-[3/4] object-cover rounded-lg"
                 />
