@@ -51,9 +51,11 @@ export const AuthProvider = ({ children }) => {
            console.log(response.data)
         } else {
           navigate('/login'); // Redirect to login if token is missing
+          localStorage.removeItem('authtoken')
         }
       } catch (err) {
         navigate('/login'); // Redirect to login if token is missing
+        localStorage.removeItem('authtoken')
       } 
     };
 
