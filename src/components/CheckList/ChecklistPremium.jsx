@@ -341,7 +341,7 @@ import { useNavigate } from "react-router-dom";
 import Pagination from "../Pagination/Pagination";
 import { HashLoader } from "react-spinners";
 import { Base_url } from "../ApiController/ApiController";
-
+import bookError  from '../../assets/bookError.png'
 const CheckList = () => {
   const [books, setBooks] = useState([]); // All books fetched from the API
   const [filteredBooks, setFilteredBooks] = useState([]); // Books after applying filters and sorting
@@ -610,7 +610,7 @@ const CheckList = () => {
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 p-8">
           {books.map((bookItem) => {
             const { book, price, mrp } = bookItem;
-            const bookImage = book?.image || "placeholder.jpg";
+            const bookImage = book?.image || bookError;
             const bookTitle = book?.title_long || "Unknown Title";
             const bookAuthor = formatArrayOrString(book?.authors);
             return (

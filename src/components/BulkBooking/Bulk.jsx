@@ -379,7 +379,12 @@ const BulkBookingPage = () => {
       switch (brochureName) {
         case "Average":
           brochureDetails = await getAverageBrochureBooks();
-          redirectTo = "/checklist"; // Navigate to Average page
+          console.log(brochureDetails)
+          if (brochureDetails === null) {
+            redirectTo = "/not-found"; // Or handle redirect for not found
+          } else {
+            redirectTo = "/checklist";
+          } // Navigate to Average page
           break;
         case "Premium":
           brochureDetails = await getPremiumBrochureBooks();

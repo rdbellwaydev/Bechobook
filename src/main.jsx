@@ -8,12 +8,12 @@ import { HashRouter } from 'react-router-dom';
 import { CartProvider } from './components/CartContext.jsx';
 createRoot(document.getElementById('root')).render(
   
+     <HashRouter>
     <AuthProvider>
         <CartProvider>
-     <HashRouter>
      <App />
-     </HashRouter>
      </CartProvider>
     </AuthProvider>
+     </HashRouter>
   
 )

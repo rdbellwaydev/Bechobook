@@ -8,6 +8,7 @@ import Swal from "sweetalert2";
 import { useAuth } from "../Authentication/AuthContext";
 import { useCart } from "../CartContext";
 import { Base_url } from "../ApiController/ApiController";
+import bookError  from '../../assets/bookError.png'
 const CatalogBooks = () => {
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -273,7 +274,7 @@ const CatalogBooks = () => {
                   onClick={() => navigate(`/product/${book.id}`)}
                 >
                   <img
-                    src={book.book.image || "https://via.placeholder.com/150"}  // Corrected path
+                    src={book.book.image || bookError}  // Corrected path
                     alt={book.book.title || "Book Image"}  // Corrected path
                     className="w-full h-45 object-contain"
                   />

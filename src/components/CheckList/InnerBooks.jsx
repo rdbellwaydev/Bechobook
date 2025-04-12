@@ -618,7 +618,7 @@ import Swal from "sweetalert2";
 import { useLocation } from "react-router-dom";
 import { useCart } from "../CartContext";
 import { Base_url } from "../ApiController/ApiController";
-
+import bookError  from '../../assets/bookError.png'
 const ProductDetails1 = () => {
   const { isbn13 } = useParams(); // Get ISBN from URL
   const navigate = useNavigate();
@@ -979,7 +979,7 @@ const handleAddToCart = async () => {
           <div className="flex flex-col md:flex-row gap-4">
             <div className="w-full md:w-1/2 mt-4">
               <img
-                src={book.image || "https://via.placeholder.com/400"}
+                src={book.image || bookError}
                 alt={book.title}
                 className="w-full h-[400px] object-contain rounded-lg"
               />

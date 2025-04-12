@@ -548,6 +548,8 @@ import Swal from "sweetalert2";
 import HashLoader from "react-spinners/HashLoader";
 import { useCart } from "../CartContext";
 import { Base_url } from "../ApiController/ApiController";
+import bookError  from '../../assets/bookError.png'
+import Pagination from "../Pagination/Pagination";
 
 const CategoryPage = () => {
   const { id } = useParams();
@@ -900,7 +902,7 @@ const handlePageChange = (newPage) => {
                 
                   onClick={() => navigate(`/product/${book.id}`)} className="border p-4 rounded-lg shadow-md">
                     <img
-                      src={book.book?.image || "https://via.placeholder.com/150"}
+                      src={book.book?.image || bookError}
                       alt={book.book?.title || "No Title"}
                       className="w-full h-45 object-contain"
                       loading="lazy" 
@@ -928,7 +930,7 @@ const handlePageChange = (newPage) => {
               </div>
 
               <div className="flex justify-center items-center gap-4 mt-6">
-                <button
+                {/* <button
                   className="bg-blue-500 text-white px-4 py-2 rounded"
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={currentPage === 1}
@@ -942,7 +944,12 @@ const handlePageChange = (newPage) => {
                   disabled={currentPage === totalPages}
                 >
                   Next
-                </button>
+                </button> */}
+                <Pagination 
+                currentPage={currentPage}
+                totalPages={totalPages}
+                goToPage={handlePageChange}
+                />
               </div>
             </>
           ) : (

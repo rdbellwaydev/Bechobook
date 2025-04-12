@@ -33,6 +33,7 @@ import { useCart } from "../components/CartContext";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { Base_url } from "../components/ApiController/ApiController";
+import bookError  from '../assets/bookError.png'
 const Home = () => {
   const navigate = useNavigate();
   const cardDetails = [
@@ -834,7 +835,7 @@ const handleAddToCart = async (product) => {
                   onClick={() => navigate(`/product/${product.id}`)}
                 >
                   <img
-                    src={product.img}
+                    src={product.img || bookError}
                     alt={product.title}
                     className="w-full h-45 object-contain max-sm:h-[100px]" // Smaller image on mobile
                   />
@@ -903,7 +904,7 @@ const handleAddToCart = async (product) => {
                     onClick={() => navigate(`/product/${product.id}`)}
                   >
                     <img
-                      src={product.img}
+                      src={product.img || bookError}
                       alt={product.title}
                       className="w-full h-45 object-contain max-sm:h-[100px]"
                     />
@@ -1074,7 +1075,7 @@ const handleAddToCart = async (product) => {
                 onClick={() => navigate(`/product/${book.id}`)}
               >
                 <img
-                  src={book.image}
+                  src={book.image || bookError}
                   alt={book.title}
                   className="w-full h-45 object-contain max-sm:h-[100px]"
                 />

@@ -33,6 +33,9 @@ export const useBrochureService = () => {
       const response = await Api.get("average-brochure-books");
       return response.data; // Adjust as per the response structure
     } catch (error) {
+      if (error.response && error.response.status === 404) {
+        return null; // Indicate "not found"
+      }
       console.error("Error fetching average brochure books:", error);
       throw error;
     }
@@ -42,6 +45,9 @@ export const useBrochureService = () => {
       const response = await Api.get("standard-brochure-books");
       return response.data; // Adjust as per the response structure
     } catch (error) {
+      if (error.response && error.response.status === 404) {
+        return null; // Indicate "not found"
+      }
       console.error("Error fetching average brochure books:", error);
       throw error;
     }
@@ -51,6 +57,9 @@ export const useBrochureService = () => {
       const response = await Api.get("premium-brochure-books");
       return response.data; // Adjust as per the response structure
     } catch (error) {
+      if (error.response && error.response.status === 404) {
+        return null; // Indicate "not found"
+      }
       console.error("Error fetching average brochure books:", error);
       throw error;
     }
@@ -60,6 +69,9 @@ export const useBrochureService = () => {
       const response = await Api.get("basic-lite-brochure-books");
       return response.data; // Adjust as per the response structure
     } catch (error) {
+      if (error.response && error.response.status === 404) {
+        return null; // Indicate "not found"
+      }
       console.error("Error fetching average brochure books:", error);
       throw error;
     }
@@ -69,6 +81,9 @@ export const useBrochureService = () => {
       const response = await Api.get("basic-brochure-books");
       return response.data; // Adjust as per the response structure
     } catch (error) {
+      if (error.response && error.response.status === 404) {
+        return null; // Indicate "not found"
+      }
       console.error("Error fetching average brochure books:", error);
       throw error;
     }

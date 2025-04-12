@@ -11,6 +11,7 @@ import Swal from "sweetalert2";
 import HashLoader from "react-spinners/HashLoader";
 import { Base_url } from '../ApiController/ApiController';
 import Pagination from '../Pagination/Pagination';
+import bookError from '../../assets/bookError.png'
 const ProductGrid = () => {
   const { authToken } = useAuth();
   const navigate = useNavigate();
@@ -75,7 +76,6 @@ const handleQuantityChange = async (productId, change) => {
     return;
   }
   let updatedCartItems;
-  console.log("=========",newQuantity < currentItem.quantity)
   if(newQuantity < currentItem.quantity){
     updatedCartItems = cartItems.map((item) => item.id === productId ? { ...item, quantity: Math.max(1, newQuantity) ,price : unitPrice* newQuantity }:item)
   }else{
@@ -268,11 +268,17 @@ const handleCheckout = async () => {
                   />
                 </svg>
               </button>
-              <img
+              {product.image ?<img
                 src={product.image}
                 alt={product.title}
                 className="w-full h-48 object-contain mb-2 rounded"
-              />
+              /> :
+              
+              <img
+                src={bookError}
+                alt={product.title}
+                className="w-full h-48 object-contain mb-2 rounded"
+              />}
               <h2 className="text-lg font-semibold text-gray-800 text-center mb-1">
                 {product.title.length > 40 ? product.title.substring(0,50)+'...' : product.title}
               </h2>
@@ -285,10 +291,10 @@ const handleCheckout = async () => {
                   ₹{product.msrp}
                 </span> */}
                 <span className="text-lg font-bold text-green-600">
-              ₹{product.price}
+              ₹{parseFloat(product.price).toFixed(2)}
             </span>
             <span className="text-sm text-orange-400 line-through">
-              ₹{product.msrp}
+              ₹{parseFloat(product.msrp).toFixed(2)}
             </span>
               </div>
               <div className="flex items-center mt-2 bg-gray-100 rounded-full px-2 py-1 shadow">
