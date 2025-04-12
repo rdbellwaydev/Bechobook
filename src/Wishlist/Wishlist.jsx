@@ -109,6 +109,7 @@ import { useAuth } from "../components/Authentication/AuthContext";
 import HashLoader from "react-spinners/HashLoader";
 import { useCart } from "../components/CartContext";
 import { Base_url } from "../components/ApiController/ApiController";
+import bookError  from '../assets/bookError.png'
 const ProductPage = () => {
   const [wishlist, setWishlist] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -487,7 +488,7 @@ const { cartItems, setCartItems } = useCart();
 
         {/* Product Image */}
         <img
-          src={product.image}
+          src={product.image || bookError}
           alt={product.name}
           className="w-full h-48 sm:h-60 max-sm:h-[120px] object-contain"
         />
