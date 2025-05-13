@@ -1,21 +1,4 @@
-// import React, { createContext, useState, useContext } from "react";
 
-// // Create AuthContext
-// const AuthContext = createContext();
-
-// // AuthProvider component to wrap the app
-// export const AuthProvider = ({ children }) => {
-//   const [authToken, setAuthToken] = useState(localStorage.getItem("authtoken"));
-
-//   return (
-//     <AuthContext.Provider value={{ authToken, setAuthToken }}>
-//       {children}
-//     </AuthContext.Provider>
-//   );
-// };
-
-// // Custom hook to use AuthContext
-// export const useAuth = () => useContext(AuthContext);
 import React, { createContext, useState, useContext, useEffect } from "react";
 import { Base_url } from "../ApiController/ApiController";
 import axios from "axios";

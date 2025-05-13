@@ -85,6 +85,16 @@ const Nav = () => {
       setShowDropdown(false);
     }
   };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (query.trim()) {
+      navigate(`/search?query=${encodeURIComponent(query.trim())}`);
+      }
+    }
+  };
+  
   useEffect(() => {
     // Fetch categories from API
     const fetchCategories = async () => {
@@ -342,6 +352,7 @@ const Nav = () => {
               placeholder="Search Here"
               value={query}
               onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
               onFocus={() => setShowDropdown(visibleResults.length > 0)}
               onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
             />

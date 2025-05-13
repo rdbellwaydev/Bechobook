@@ -12,7 +12,7 @@ export default function OrderDetails() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const navigate = useNavigate();
-  const perPage = 10;
+  const perPage = 100;
 
   const {orderId} = useParams(); // Replace this if you want to fetch dynamically
 
@@ -21,7 +21,7 @@ export default function OrderDetails() {
   }, [page]);
 
   const fetchOrderDetails = async () => {
-    ApiService.orderDetails({order_id:orderId}).then((response)=>{
+    ApiService.orderDetails({order_id:orderId ,page ,per_page:perPage}).then((response)=>{
         if(response.data.status){
            setOrder(response.data.data);
            setLoading(false);
@@ -74,6 +74,7 @@ export default function OrderDetails() {
     src={book.title?.image || 'no-image.png'}
     alt={book.title?.title || 'Book'}
     className="w-full h-full object-cover"
+     loading="lazy"
   />
 </div>
 

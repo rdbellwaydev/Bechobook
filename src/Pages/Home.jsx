@@ -839,11 +839,14 @@ const handleAddToCart = async (product) => {
                   className="relative border p-4 rounded-lg shadow-md cursor-pointer transition transform hover:scale-105 max-sm:p-2 max-sm:scale-95 flex flex-col justify-between" // Added "flex flex-col justify-between"
                   onClick={() => navigate(`/product/${product.id}`)}
                 >
-                  <img
-                    src={product.img || bookError}
-                    alt={product.title}
-                    className="w-full h-45 object-contain max-sm:h-[100px]" // Smaller image on mobile
-                  />
+                       <div className="w-full max-w-[160px] mx-auto aspect-[2/3] bg-gray-100 overflow-hidden">
+  <img
+    src={product.img || 'https://via.placeholder.com/150'}
+    alt={product.title || 'Book'}
+    className="w-full h-full object-cover"
+     loading="lazy"
+  />
+</div>
                   <h2 className="font-semibold mt-2 truncate w-full max-sm:text-sm"> {/* Smaller text on mobile */}
                     {product.title}
                   </h2>
@@ -913,11 +916,19 @@ const handleAddToCart = async (product) => {
                     className="relative border p-4 rounded-lg shadow-md cursor-pointer transition transform hover:scale-105"
                     onClick={() => navigate(`/product/${product.id}`)}
                   >
-                    <img
+                    {/* <img
                       src={product.img || bookError}
                       alt={product.title}
                       className="w-full h-45 object-contain max-sm:h-[100px]"
-                    />
+                    /> */}
+                                    <div className="w-full max-w-[160px] mx-auto aspect-[2/3] bg-gray-100 overflow-hidden">
+  <img
+    src={product.img || 'https://via.placeholder.com/150'}
+    alt={product.title || 'Book'}
+    className="w-full h-full object-cover"
+     loading="lazy"
+  />
+</div>
                     <h2 className="font-semibold mt-2 truncate w-full">{product.title}</h2>
                     <div className="flex items-center justify-between mt-2">
                       <span className="text-lg font-bold text-black">{product.currentprice}</span>
