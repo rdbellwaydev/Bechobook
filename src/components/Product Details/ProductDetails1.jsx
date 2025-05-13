@@ -334,6 +334,7 @@ import { useCart } from "../CartContext";
 import Swal from "sweetalert2";
 import { Base_url } from "../ApiController/ApiController";
 import bookError  from '../../assets/bookError.png';
+import axios from "axios";
 const InnerBooks = () => {
   const { id } = useParams(); // Get dynamic ID from the URL
   const navigate = useNavigate();
@@ -343,7 +344,7 @@ const InnerBooks = () => {
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [visibleCount, setVisibleCount] = useState(16); // Initially show 10 products
   const [quantity, setQuantity] = useState(1);
- 
+  const [IsInCart, setIsInCart] = useState(false);
 const { cartItems, setCartItems } = useCart();
   const handleQuantityChange = (change) => {
     const newQuantity = quantity + change;
@@ -360,31 +361,34 @@ const { cartItems, setCartItems } = useCart();
   const handleLoadMore = () => {
     setVisibleCount(relatedProducts.length); // Show all products
   };
-  useEffect(() => {
-    const fetchBookDetails = async () => {
-      try {
-        const response = await fetch(`${Base_url}getBookById/${id}`);
-        const data = await response.json();
-        if (data.status && data.data) {
-          setProduct(data.data);
-        } else {
-          setProduct(null);
-        }
-      } catch (error) {
-        console.error("Error fetching book details:", error);
-      } finally {
-        setLoading(false);
+  const fetchBookDetails = async () => {
+    try {
+      const userId = localStorage.getItem('user_id') || '';
+      const response = await axios.get(`${Base_url}getBookById/${id}?user_id=${userId}`);
+      if (response.data.status && response.data.data) {
+        setProduct(response.data.data);
+        setIsInCart(response.data.data.is_in_cart);
+      } else {
+        setProduct(null);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching book details:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+   
     if (id) {
       fetchBookDetails();
     }
-  }, [id]); // Runs whenever the ID changes
+  }, [id]); // Runs whenever the ID or authToken changes
 
   useEffect(() => {
     const fetchRelatedProducts = async () => {
       try {
-        const response = await fetch(`${Base_url}getSimilarBooks?book_id=${id}`);
+        const userId = localStorage.getItem('user_id') || '';
+        const response = await fetch(`${Base_url}getSimilarBooks?book_id=${id}&user_id=${userId}`);
         const data = await response.json();
         if (data.status && data.data) {
           setRelatedProducts(data.data);
@@ -504,14 +508,14 @@ const handleAddToCart = async (product) => {
       const data = await response.json();
   
       if (data.status) {
-        Swal.fire({
-          icon: "success",
-          title: "Added to Cart",
-          text: "Book added to cart successfully!",
-        }).then(() => {
-          // navigate("/cart");
-        });
-  
+        // Swal.fire({
+        //   icon: "success",
+        //   title: "Added to Cart",
+        //   text: "Book added to cart successfully!",
+        // }).then(() => {
+        //   // navigate("/cart");
+        // });
+        fetchBookDetails();
         // Update the cartItems state with the new item
         setCartItems((prevItems) => [
           ...prevItems,
@@ -659,12 +663,18 @@ const handleAddToCart = async (product) => {
               </div> */}
 
               <div className="flex space-x-4">
-                <button
-                  onClick={() => handleAddToCart(product)}
-                  className="flex items-center px-4 py-2 border border-orange-500 text-orange-500 font-semibold rounded-lg hover:bg-orange-500 hover:text-white transition-colors mt-4"
-                >
-                  🛒 Add to Cart
-                </button>
+              <button
+  onClick={() => handleAddToCart(product)}
+  disabled={IsInCart}
+  className={`flex items-center px-4 py-2 border 
+    ${IsInCart 
+      ? 'border-yellow-500 text-white bg-yellow-500 cursor-not-allowed' 
+      : 'border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-white'} 
+    font-semibold rounded-lg transition-colors mt-4`}
+>
+  🛒 {IsInCart ? 'Added to Cart' : 'Add to Cart'}
+</button>
+
                 <button
                   // onClick={handleAddToWishlist}
                   onClick={() => handleAddToWishlist(product)}

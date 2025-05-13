@@ -384,7 +384,7 @@ const LoginForm = () => {
       if (response.data.status) {
         // Store the token in localStorage
         localStorage.setItem("authtoken", response.data.token);
-
+        localStorage.setItem("user_id", response.data.user.id);
         // Set the authToken in context
         setAuthToken(response.data.token);
 

@@ -21,6 +21,8 @@ import ProtectedRoute from './components/Protected';
 import Featured from './components/Catalog/Featured';
 import NewArrival from './components/Catalog/NewArrival';
 import MostViewed from './components/Catalog/MostViewed';
+import MyOrders from './Pages/MyOrders';
+import OrderDetails from './Pages/OrderDetails';
 const ScrollToTop = () => {
    
   const { pathname } = useLocation();
@@ -63,6 +65,8 @@ const App = () => {
       <Route path="/checklist-premium" element= {<ChecklistPremium/>}/>
       <Route path="/checklist-basic-lite" element= {<ChecklistBasic/>}/>
       <Route path="/checklist-basic" element= {<ChecklistlastBasic/>}/>
+      <Route path="/myorders" element= {<MyOrders/>}/>
+      <Route path="/order-details/:orderId" element= {<OrderDetails/>}/>
       </Routes>
     </div>
   )

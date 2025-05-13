@@ -242,6 +242,7 @@ const Nav = () => {
           </div>
           <Link to="/profile" className="py-2 border-b">My Account</Link>
           <Link to="/get-in-touch" className="py-2 border-b">Contact Us</Link>
+          <Link to="/myorders" className="py-2 border-b">My Orders</Link>
         </ul>
       </div>
       {/* Desktop View */}

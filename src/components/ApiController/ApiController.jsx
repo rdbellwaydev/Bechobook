@@ -2,6 +2,37 @@ import axios from "axios";
 
 export const Base_url =   'https://admin.bechobook.com/api/'; //'https://bb.bechobookscan.com/api/';
  
+const Api = axios.create({
+  baseURL: Base_url,
+  headers: {
+      'Accept': 'application/json',
+      // Authorization: `Bearer ${sessionStorage.getItem('authtoken')}`
+  }
+});
+
+
+Api.interceptors.request.use(config => {
+  const token = localStorage.getItem('authtoken');
+  if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`;
+  }
+  if (config.data instanceof FormData) {
+      config.headers['Content-Type'] = 'multipart/form-data';
+  } else {
+      config.headers['Content-Type'] = 'application/json';
+  }
+  return config;
+}, error => {
+  return Promise.reject(error);
+});
+
+
+const ApiService = {
+     GetOrders : (params) => Api.get('/GetOrders',{params}),
+     orderDetails : (params) => Api.get('/orderDetails',{params}),
+};
+
+export default ApiService;
 export const useBrochureService = () => {
     // Base URL for the API
     // const ApiBaseUrl = "https://bb.bechobookscan.com/api/";
@@ -22,7 +53,7 @@ export const useBrochureService = () => {
     try {
       const response = await Api.get("brochures/all");
       return response.data.data;
-      console
+     
     } catch (error) {
       console.error("Error fetching all brochures:", error);
       throw error;

@@ -170,7 +170,7 @@ const Home = () => {
   
         // ✅ Ensure valid data before updating state
         setCartItems(data.data || []);
-        setTotalPrice(data.total_price ?? 0);
+        // setTotalPrice(data.total_price ?? 0);
         setTotalPages(data.pagination?.last_page ?? 1);
       } catch (error) {
         console.error("Error fetching cart data:", error);
@@ -184,8 +184,9 @@ const Home = () => {
   useEffect(() => {
     const fetchBooks = async () => {
       try {
+        const userId = localStorage.getItem("user_id");
         const response = await fetch(
-          `${Base_url}getBooksByCatalog?catalogs=${categoryMap[activeCategory]}`,
+          `${Base_url}getBooksByCatalog?catalogs=${categoryMap[activeCategory]}&user_id=${userId}`,
           {
             method: "GET",
             headers: {
@@ -204,6 +205,7 @@ const Home = () => {
             currentprice: `$${item.price}`,
             mrp: `$${item.mrp}`,
             discount: `${item.discount}% OFF`,
+            is_in_cart: item.is_in_cart,
           }));
 
           setProducts((prev) => ({
@@ -471,7 +473,8 @@ const handleAddToCart = async (product) => {
   useEffect(() => {
     const fetchDiscountedBooks = async () => {
       try {
-        const response = await fetch(Base_url+"getAllDiscountedBooks");
+        const userId = localStorage.getItem("user_id");
+        const response = await fetch(Base_url+`getAllDiscountedBooks?user_id=${userId}`);
         const data = await response.json();
 
         if (data.status && data.data) {
@@ -482,7 +485,8 @@ const handleAddToCart = async (product) => {
             title: item.book.title,
             currentprice: `₹${item.price}`,
             mrp: `₹${item.mrp}`,
-            discount: item.discount ? `${item.discount}% OFF` : null
+            discount: item.discount ? `${item.discount}% OFF` : null,
+            is_in_cart: item.is_in_cart,
           }));
 
           setProducts1(formattedProducts);
@@ -499,7 +503,8 @@ const handleAddToCart = async (product) => {
   useEffect(() => {
     const fetchBestSellingBooks = async () => {
       try {
-        const response = await fetch(Base_url+"getBestSellingBooks");
+        const userId = localStorage.getItem("user_id");
+        const response = await fetch(Base_url+`getBestSellingBooks?user_id=${userId}`);
         const data = await response.json();
 
         if (data.status && data.data) {
@@ -857,11 +862,16 @@ const handleAddToCart = async (product) => {
                       </span>
                     </div>
                   ) : null}
-
+                  
                   {/* Cart Button Wrapper */}
                   <div className="flex justify-end items-center mt-2"> {/* Ensures button stays at the bottom */}
                     <button
-                      className="bg-white border border-gray-300 p-2 rounded-full shadow-md transition hover:bg-gray-200 flex items-center justify-center"
+                    disabled={product?.is_in_cart}
+                      className={`p-2 rounded-full shadow-md transition${
+                        product?.is_in_cart
+                          ? 'border-yellow-500 text-white bg-yellow-500 cursor-not-allowed' 
+                          : "border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-white"
+                      } flex items-center justify-center`}
                       onClick={(e) => {
                         e.stopPropagation(); // Prevent navigating to product page
                         handleAddToCart(product);
@@ -922,7 +932,12 @@ const handleAddToCart = async (product) => {
                     )}
                     <div className="flex justify-end items-center mt-2"> {/* Ensures button stays at the bottom */}
                       <button
-                        className="bg-white border border-gray-300 p-2 rounded-full shadow-md transition hover:bg-gray-200 flex items-center justify-center"
+                      disabled={product?.is_in_cart}
+                        className={` p-2 rounded-full shadow-md transition${
+                        product?.is_in_cart
+                          ? 'border-yellow-500 text-white bg-yellow-500 cursor-not-allowed' 
+                          : "border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-white"
+                      } flex items-center justify-center`}
                         onClick={(e) => {
                           e.stopPropagation(); // Prevent navigating to product page
                           handleAddToCart(product);
@@ -1085,7 +1100,12 @@ const handleAddToCart = async (product) => {
                 </div>
                 <div className="flex justify-end items-center mt-2">
                   <button
-                    className="bg-white border border-gray-300 p-2 rounded-full shadow-md transition hover:bg-gray-200 flex items-center justify-center"
+                  disabled={book?.is_in_cart}
+                    className={` p-2 rounded-full shadow-md transition${
+                      book?.is_in_cart
+                        ? 'border-yellow-500 text-white bg-yellow-500 cursor-not-allowed' 
+                        : "border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-white"
+                    } flex items-center justify-center`}
                     onClick={(e) => {
                       e.stopPropagation(); // Prevent navigating to product page
                       handleAddToCart(book);

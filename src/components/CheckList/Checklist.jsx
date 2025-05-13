@@ -6,7 +6,7 @@ import Swal from "sweetalert2";
 import Header from "../Header/Header";
 import Nav from "../Header/Nav";
 import Footer from "../Footer/Footer";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import Pagination from "../Pagination/Pagination";
 import { HashLoader } from "react-spinners";
 import { Base_url } from "../ApiController/ApiController";
@@ -14,31 +14,49 @@ import bookError  from '../../assets/bookError.png'
 const CheckList = () => {
   const [books, setBooks] = useState([]);
   const [totalPrice, setTotalPrice] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
+  // const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [filteredBooks, setFilteredBooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isSortOpen, setIsSortOpen] = useState(false);
-  const [selectedFilters, setSelectedFilters] = useState([]);
-  const [sortBy, setSortBy] = useState("Select");
+  // const [selectedFilters, setSelectedFilters] = useState([]);
+  // const [sortBy, setSortBy] = useState("Select");
   const [isOpen, setIsOpen] = useState(false);
   const [categories,setCategories] =  useState([]);
   const { authToken } = useAuth();
   const navigate = useNavigate();
-  const fetchBooks = async (page = 1) => {
+
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedFilters = searchParams.get("filters")?.split(",") || [];
+  const sortBy = searchParams.get("sort") || "Select";
+  const currentPage = parseInt(searchParams.get("page") || "1", 10);
+
+
+  const updateSearchParams = (params) => {
+    const newParams = new URLSearchParams(searchParams);
+    Object.entries(params).forEach(([key, value]) => {
+      if (value === null || value === undefined || value === "" || (Array.isArray(value) && value.length === 0)) {
+        newParams.delete(key);
+      } else {
+        newParams.set(key, Array.isArray(value) ? value.join(",") : value);
+      }
+    });
+    setSearchParams(newParams);
+  };
+  const fetchBooks = async () => {
     try {
       console.log("=====",sortBy);
       setLoading(true);
       const response = await axios.get(
         Base_url + "average-brochure-books",
-        { params: { page,category_names:selectedFilters,sort:sortBy } }
+        { params: { page:currentPage,category_names:selectedFilters,sort:sortBy } }
       );
 
       const { data, pagination, total_price ,category_in_book } = response.data;
       setBooks(data);
       setFilteredBooks(data); // Initialize filteredBooks with the fetched data
       setTotalPrice(total_price || 0);
-      setCurrentPage(pagination.current_page);
+      // setCurrentPage(pagination.current_page);
       setTotalPages(pagination.last_page);
 
       setCategories(category_in_book);
@@ -51,15 +69,15 @@ const CheckList = () => {
 
   useEffect(() => {
     fetchBooks(currentPage);
-  }, [currentPage,selectedFilters,sortBy]);
+  }, [searchParams.toString()]);
 
 
 
 
   const handlePageChange = (page) => {
     if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
+        updateSearchParams({ page });
+      }
   };
 
  
@@ -70,15 +88,20 @@ const CheckList = () => {
   };
 
   const toggleCheckbox = (category) => {
-    setSelectedFilters((prevCategory)=> prevCategory.includes(category) ? prevCategory.filter((c) => c != category) :
-         [...prevCategory , category]
-      );
-      setIsOpen(false)
-      setCurrentPage(1)
+    // setSelectedFilters((prevCategory)=> prevCategory.includes(category) ? prevCategory.filter((c) => c != category) :
+    //      [...prevCategory , category]
+    //   );
+    //   setIsOpen(false)
+    //   setCurrentPage(1)
+    const updatedFilters = selectedFilters.includes(category)
+      ? selectedFilters.filter((c) => c !== category)
+      : [...selectedFilters, category];
+    updateSearchParams({ filters: updatedFilters, page: 1 });
+    setIsOpen(false);
   };
 
   const handleSortSelection = (option) => {
-    setSortBy(option);
+    updateSearchParams({ sort: option, page: 1 });
     setIsSortOpen(false);
   };
 
