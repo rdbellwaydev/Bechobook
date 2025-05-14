@@ -21,7 +21,7 @@ export const AuthProvider = ({ children }) => {
     }
     const fetchProfile = async () => {
       if (!authToken) {
-        navigate('/login'); // Redirect to login if token is missing
+        navigate('/'); // Redirect to login if token is missing
         return;
       }
 
@@ -33,11 +33,11 @@ export const AuthProvider = ({ children }) => {
         if (response.data.status) {
            console.log(response.data)
         } else {
-          navigate('/login'); // Redirect to login if token is missing
+          navigate('/'); // Redirect to login if token is missing
           localStorage.removeItem('authtoken')
         }
       } catch (err) {
-        navigate('/login'); // Redirect to login if token is missing
+        navigate('/'); // Redirect to login if token is missing
         localStorage.removeItem('authtoken')
       } 
     };

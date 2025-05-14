@@ -242,11 +242,14 @@ const CatalogBooks = () => {
                   onClick={() => navigate(`/product/${book.id}`)}
                 >
                   
-                  <img
-                    src={book.book.image || "https://via.placeholder.com/150"}  // Corrected path
-                    alt={book.book.title || "Book Image"}  // Corrected path
-                    className="w-full h-45 object-contain"
-                  />
+                  <div className="w-full max-w-[160px] mx-auto aspect-[2/3] bg-gray-100 overflow-hidden">
+                <img
+                  src={book.book?.image || bookError}
+                  alt={book.book?.title}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+                </div>
                   <h2 className="font-semibold mt-2 truncate w-full">{book.book.title || "Unknown Title"}</h2>
                   <div className="flex items-center justify-between mt-2">
                     <span className="text-lg font-bold text-black">₹{book.price}</span>

@@ -979,107 +979,7 @@ const handleAddToCart = async (product) => {
         </div>
       </div>
 
-      {/* best sellers heading*/}
-      {/* <div className="w-[80vw] mx-auto my-10  ">
-        <h1 className="text-center text-3xl border-b-4 w-fit mx-auto pb-2 rounded border-lime-600">
-          Best sellers
-        </h1>
-      </div> */}
-      {/*best seller mobile cards */}
-      {/* <div className="px-4 md:hidden py-2">
-        <Swiper
-          spaceBetween={20}
-          slidesPerView={1}
-          pagination={{ clickable: true }}
-          breakpoints={{
-            640: {
-              slidesPerView: 2,
-              spaceBetween: 40,
-            },
-          }}
-        >
-          {bestSellers.map((product, idx) => (
-            <SwiperSlide key={idx}>
-              <ProductCard1
-                img={product.img}
-                title={product.title}
-                desc={product.desc}
-                currentprice={product.currentprice}
-                mrp={product.mrp}
-                discount={product.discount}
-              />
-            </SwiperSlide>
-          ))}
-        </Swiper>
-      </div> */}
-      {/*best sellers desktop cards */}
-      {/* <div className="hidden md:inline">
-        <div className="flex px-20 flex-wrap gap-10">
-          {bestSellers.map((product, idx) => (
-            <ProductCard4
-              key={idx}
-              img={product.img}
-              title={product.title}
-              desc={product.desc}
-              currentprice={product.currentprice}
-              mrp={product.mrp}
-              discount={product.discount}
-            />
-          ))}
-        </div>
-      </div> */}
-
-      {/* <div className="flex flex-col justify-center items-center min-h-screen">
-       
-        <h1 className="text-center text-3xl border-b-4 w-fit mx-auto pb-2 rounded border-lime-600 mt-12">
-          Best Sellers
-        </h1>
-
-        <div className="max-w-6xl mx-auto mt-6 px-4 sm:px-6 lg:px-0">
-          {loading ? (
-            <p className="text-center text-lg font-semibold">Loading books...</p>
-          ) : (
-            
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mt-4 w-full">
-              {books.map((book) =>
-                book.title && book.image ? ( // Ensure book has valid data
-                  <div
-                    key={book.id}
-                    className="relative border p-4 rounded-lg shadow-md cursor-pointer transition transform hover:scale-105"
-                    onClick={() => navigate(`/product/${book.id}`)}
-                  >
-                    <img
-                      src={book.image}
-                      alt={book.title}
-                      className="w-full h-45 object-contain max-sm:h-[100px]"
-                    />
-                    <h2 className="font-semibold mt-2 truncate w-full">{book.title}</h2>
-                    <div className="flex items-center justify-between mt-2">
-                      <span className="text-lg font-bold text-black">₹{book.price}</span>
-                    </div>
-                    <div className="flex justify-end items-center mt-2"> 
-                      <button
-                        className="bg-white border border-gray-300 p-2 rounded-full shadow-md transition hover:bg-gray-200 flex items-center justify-center"
-                        onClick={(e) => {
-                          e.stopPropagation(); // Prevent navigating to product page
-                          handleAddToCart(book);
-                        }}
-                      >
-                        <img
-                          src="https://cdn-icons-png.flaticon.com/512/1170/1170678.png"
-                          alt="Add to Cart"
-                          className="w-5 h-5 max-sm:w-4 max-sm:h-4"
-                        />
-                      </button>
-                    </div>
-                  </div>
-                ) : null
-
-              )}
-            </div>
-          )}
-        </div>
-      </div> */}
+     
 {books.length > 0 && (
   <div className="flex flex-col justify-center items-center min-h-screen">
     {/* Heading */}
@@ -1100,11 +1000,14 @@ const handleAddToCart = async (product) => {
                 className="relative border p-4 rounded-lg shadow-md cursor-pointer transition transform hover:scale-105"
                 onClick={() => navigate(`/product/${book.id}`)}
               >
+                  <div className="w-full max-w-[160px] mx-auto aspect-[2/3] bg-gray-100 overflow-hidden">
                 <img
                   src={book.image || bookError}
                   alt={book.title}
-                  className="w-full h-45 object-contain max-sm:h-[100px]"
+                  className="w-full h-full object-cover"
+                  loading="lazy"
                 />
+                </div>
                 <h2 className="font-semibold mt-2 truncate w-full">{book.title}</h2>
                 <div className="flex items-center justify-between mt-2">
                   <span className="text-lg font-bold text-black">₹{book.price}</span>

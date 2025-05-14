@@ -766,13 +766,14 @@ const handleAddToCart = async (product) => {
               className="bg-white shadow-md rounded-lg p-3 h-full flex flex-col justify-between"
             >
               {/* Image */}
-              <div className="w-full">
+              <div className="w-full max-w-[160px] mx-auto aspect-[2/3] bg-gray-100 overflow-hidden">
                 <img
-                  src={product.book.image || bookError}
+                  src={product.book.image}
                   alt={product.book.title}
-                  className="w-full aspect-[3/4] object-cover rounded-lg"
+                  className="w-full h-full object-cover"
+                  loading="lazy"
                 />
-              </div>
+                </div>
 
               {/* Product Details */}
               <div className="mt-2">

@@ -268,11 +268,14 @@ const updateSearchParams = (params) => {
               className="bg-white border border-gray-200 shadow-lg rounded-lg p-2 flex flex-col items-center transition-transform transform hover:scale-105 w-full sm:w-48"
               onClick={() => navigate(`/book/${book.isbn13}`, { state: { hideActions: true } })}
             >
-              <img
-                src={bookImage}
-                alt={bookTitle}
-                className="w-full h-40 object-contain mb-2 rounded"
-              />
+              <div className="w-full max-w-[160px] mx-auto aspect-[2/3] bg-gray-100 overflow-hidden">
+                <img
+                  src={bookImage}
+                  alt={bookTitle}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+                </div>
               <h2 className="text-sm sm:text-lg font-semibold text-gray-800 text-center mb-1">
                 {bookTitle}
               </h2>

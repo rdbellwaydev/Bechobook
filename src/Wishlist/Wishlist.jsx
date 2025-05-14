@@ -487,11 +487,19 @@ const { cartItems, setCartItems } = useCart();
         </button>
 
         {/* Product Image */}
-        <img
+        {/* <img
           src={product.image || bookError}
           alt={product.name}
           className="w-full h-48 sm:h-60 max-sm:h-[120px] object-contain"
-        />
+        /> */}
+        <div className="w-full max-w-[160px] mx-auto aspect-[2/3] bg-gray-100 overflow-hidden">
+                <img
+                  src={product.image}
+                  alt={product.title}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+                </div>
 
         {/* Product Details */}
         <div className="p-2 sm:p-4">
