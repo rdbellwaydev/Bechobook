@@ -155,7 +155,7 @@ const Nav = () => {
 
   const handleCategoryClick = (categoryId) => {
     navigate(`/category/${categoryId}`);
-    window.location.reload(); // Force reload after navigation
+    // window.location.reload(); // Force reload after navigation
   };
   return (
     <nav className="bg-[#151515] md:bg-white border-b border-gray-300">
@@ -328,11 +328,7 @@ const Nav = () => {
                     <li key={category.id} className="p-2 hover:bg-gray-200">
                      <Link
   to={`/category/${category.id}`}
-  onClick={() => {
-    setTimeout(() => {
-      window.location.reload();
-    }, 100); // Small delay to ensure navigation completes before reload
-  }}
+ 
 >{category.name}
                       </Link>
                     </li>

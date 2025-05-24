@@ -39,30 +39,30 @@ const CategoryPage = () => {
     setSearchParams(newParams);
   };
 
-  useEffect(() => {
-    const fetchBooks = async () => {
-      setLoading(true);
-      try {
-        const userId = localStorage.getItem("user_id");
-        const response = await fetch(
-          `${Base_url}getBooksByCategory?category_id=${id}&page=${currentPage}${selectedCondition ? `&condition_name=${selectedCondition}` : ""}${userId ? `&user_id=${userId}` : ""}`
-        );
-        const data = await response.json();
-        if (data.status) {
-          setBooks(data.data);
-          
-          setTotalPages(data.pagination.total_pages);
-          setCategoryName(data.data.length > 0 ? data.data[0].category_name : "Books");
-        } else {
-          setBooks([]);
-        }
-      } catch (error) {
-        console.error("Error fetching books:", error);
+  const fetchBooks = async () => {
+    setLoading(true);
+    try {
+      const userId = localStorage.getItem("user_id");
+      const response = await fetch(
+        `${Base_url}getBooksByCategory?category_id=${id}&page=${currentPage}${selectedCondition ? `&condition_name=${selectedCondition}` : ""}${userId ? `&user_id=${userId}` : ""}`
+      );
+      const data = await response.json();
+      if (data.status) {
+        setBooks(data.data);
+        
+        setTotalPages(data.pagination.total_pages);
+        setCategoryName(data.data.length > 0 ? data.data[0].category_name : "Books");
+      } else {
         setBooks([]);
-      } finally {
-        setLoading(false);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching books:", error);
+      setBooks([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
 
     fetchBooks();
   }, [id,searchParams.toString()]);
@@ -113,12 +113,8 @@ const CategoryPage = () => {
       const data = await response.json();
 
       if (data.status) {
-        Swal.fire({
-          icon: "success",
-          title: "Added to Cart",
-          text: "Book added to cart successfully!",
-        });
-
+      
+        fetchBooks();
         setCartItems((prevItems) => [
           ...prevItems,
           { ...book, book_id: book.id },
@@ -198,11 +194,28 @@ const CategoryPage = () => {
                     <h2 className="font-semibold truncate">
                       {book.book?.title || "No Title"}
                     </h2>
-                    <span className="text-lg font-bold">₹{book.price}</span>
+                    {/* <span className="text-lg font-bold">₹{book.price}</span> */}
+                    <div className="flex items-center justify-between mt-2">
+                    <span className="text-lg font-bold text-black max-sm:text-base"> {/* Smaller text on mobile */}
+                      ₹{book.price.replace(/\$/g, "")}
+                    </span>
+                    <span className="text-orange-400 line-through text-sm max-sm:text-xs"> {/* Smaller text on mobile */}
+                      ₹{book.mrp.replace(/\$/g, "")}
+                    </span>
+                  </div>
+                  {book.discount && book.discount !== "null% OFF" ? (
+                    <div className="flex items-center justify-between mt-1">
+                      <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full max-sm:text-[10px]"> {/* Smaller text on mobile */}
+                        {book.discount.replace("null% OFF", "").trim()}% OFF
+                      </span>
+                    </div>
+                  ) : null}
                     <div className="flex justify-end items-center mt-2">
                     <button
+                    disabled={book.is_in_cart}
   className={`p-2 rounded-full shadow-md border 
-    ${book.is_in_cart ? "bg-yellow-400 border-yellow-500" : "bg-white border-grey-400 hover:bg-yellow-300"}`}
+    ${book.is_in_cart ? 'border-yellow-500 text-white bg-yellow-500 cursor-not-allowed' 
+                          : "border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-white"}`}
   onClick={(e) => {
     e.stopPropagation();
     handleAddToCart(book);
@@ -212,7 +225,7 @@ const CategoryPage = () => {
     src="https://cdn-icons-png.flaticon.com/512/1170/1170678.png"
     alt="Add to Cart"
     className="w-5 h-5"
-    style={book.is_in_cart ? { filter: "invert(1)" } : {}}
+    // style={book.is_in_cart ? { filter: "invert(1)" } : {}}
   />
 </button>
 

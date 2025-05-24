@@ -284,6 +284,10 @@ const updateSearchParams = (params) => {
                 <p className="text-xs sm:text-sm text-gray-600 text-center mb-1">
                   {bookAuthor}
                 </p>
+                <div className="mt-1 text-xs sm:text-sm text-gray-700 text-center">
+  <span className="font-medium text-gray-500">Quantity you'll get: </span>
+  <span className="font-semibold text-blue-600">{bookItem.quantity}</span>
+</div>
                 <div className="flex items-center justify-center mt-1">
                   <span className="text-base sm:text-lg font-bold text-green-600">
                     ₹{price || "N/A"}
@@ -292,6 +296,7 @@ const updateSearchParams = (params) => {
                     ₹{mrp || "N/A"}
                   </span>
                 </div>
+                
               </div>
             );
           })}

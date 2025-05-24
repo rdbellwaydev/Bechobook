@@ -35,10 +35,11 @@ export const AuthProvider = ({ children }) => {
         } else {
           navigate('/'); // Redirect to login if token is missing
           localStorage.removeItem('authtoken')
+          localStorage.removeItem('user_id')
         }
       } catch (err) {
         navigate('/'); // Redirect to login if token is missing
-        localStorage.removeItem('authtoken')
+        localStorage.removeItem('user_id')
       } 
     };
 

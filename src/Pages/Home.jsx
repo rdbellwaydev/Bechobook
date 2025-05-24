@@ -181,43 +181,44 @@ const Home = () => {
   
     fetchCartData();
   }, [authToken, currentPage]);
-  useEffect(() => {
-    const fetchBooks = async () => {
-      try {
-        const userId = localStorage.getItem("user_id");
-        const response = await fetch(
-          `${Base_url}getBooksByCatalog?catalogs=${categoryMap[activeCategory]}&user_id=${userId}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        const data = await response.json();
-        if (data.status && data.data.length > 0) {
-          const categorizedBooks = data.data.map((item) => ({
-            id: item.id,
-            img: item.book.image,
-            title: item.book.title,
-            desc: item.book.synopsis || "No description available",
-            currentprice: `$${item.price}`,
-            mrp: `$${item.mrp}`,
-            discount: `${item.discount}% OFF`,
-            is_in_cart: item.is_in_cart,
-          }));
-
-          setProducts((prev) => ({
-            ...prev,
-            [activeCategory]: categorizedBooks,
-          }));
+  const fetchBooks = async () => {
+    try {
+      const userId = localStorage.getItem("user_id");
+      const response = await fetch(
+        `${Base_url}getBooksByCatalog?catalogs=${categoryMap[activeCategory]}&user_id=${userId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
         }
-      } catch (error) {
-        console.error("Error fetching books:", error);
-      }
-    };
+      );
 
+      const data = await response.json();
+      if (data.status && data.data.length > 0) {
+        const categorizedBooks = data.data.map((item) => ({
+          id: item.id,
+          img: item.book.image,
+          title: item.book.title,
+          desc: item.book.synopsis || "No description available",
+          currentprice: `$${item.price}`,
+          mrp: `$${item.mrp}`,
+          discount: `${item.discount}% OFF`,
+          is_in_cart: item.is_in_cart,
+        }));
+
+        setProducts((prev) => ({
+          ...prev,
+          [activeCategory]: categorizedBooks,
+        }));
+      }
+    } catch (error) {
+      console.error("Error fetching books:", error);
+    }
+  };
+
+  useEffect(() => {
+    
     fetchBooks();
   }, [activeCategory]); // Fetch data when activeCategory changes
   useEffect(() => {
@@ -268,6 +269,9 @@ const Home = () => {
     slidesToScroll: 4, // Scroll 4 items at a time
     swipe: true, // Enable touch swipe
     touchMove: true, // Allow smooth scrolling
+    autoplay: true,
+autoplaySpeed: 2000, // Time in milliseconds (3 seconds between slides)
+pauseOnHover: true, // Optional: pause autoplay when user hovers
     nextArrow: window.innerWidth > 768 ? <NextArrow /> : null,
     prevArrow: window.innerWidth > 768 ? <PrevArrow /> : null,
     responsive: [
@@ -441,14 +445,10 @@ const handleAddToCart = async (product) => {
       const data = await response.json();
   
       if (data.status) {
-        Swal.fire({
-          icon: "success",
-          title: "Added to Cart",
-          text: "Book added to cart successfully!",
-        }).then(() => {
-          // navigate("/cart");
-        });
-  
+      
+        fetchBooks();
+        fetchDiscountedBooks();
+        fetchBestSellingBooks();
         // Update the cartItems state with the new item
         setCartItems((prevItems) => [
           ...prevItems,
@@ -470,55 +470,52 @@ const handleAddToCart = async (product) => {
     }
   };
  
-  useEffect(() => {
-    const fetchDiscountedBooks = async () => {
-      try {
-        const userId = localStorage.getItem("user_id");
-        const response = await fetch(Base_url+`getAllDiscountedBooks?user_id=${userId}`);
-        const data = await response.json();
+  const fetchDiscountedBooks = async () => {
+    try {
+      const userId = localStorage.getItem("user_id");
+      const response = await fetch(Base_url+`getAllDiscountedBooks?user_id=${userId}`);
+      const data = await response.json();
 
-        if (data.status && data.data) {
-          // Transform API response to match the UI structure
-          const formattedProducts = data.data.map((item) => ({
-            id: item.id,
-            img: item.book.image,
-            title: item.book.title,
-            currentprice: `₹${item.price}`,
-            mrp: `₹${item.mrp}`,
-            discount: item.discount ? `${item.discount}% OFF` : null,
-            is_in_cart: item.is_in_cart,
-          }));
+      if (data.status && data.data) {
+        // Transform API response to match the UI structure
+        const formattedProducts = data.data.map((item) => ({
+          id: item.id,
+          img: item.book.image,
+          title: item.book.title,
+          currentprice: `₹${item.price}`,
+          mrp: `₹${item.mrp}`,
+          discount: item.discount ? `${item.discount}% OFF` : null,
+          is_in_cart: item.is_in_cart,
+        }));
 
-          setProducts1(formattedProducts);
-        }
-      } catch (error) {
-        console.error("Error fetching books:", error);
-      } finally {
-        setLoading(false);
+        setProducts1(formattedProducts);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching books:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  const fetchBestSellingBooks = async () => {
+    try {
+      const userId = localStorage.getItem("user_id");
+      const response = await fetch(Base_url+`getBestSellingBooks?user_id=${userId}`);
+      const data = await response.json();
+
+      if (data.status && data.data) {
+        // Extract books from multiple users
+        const extractedBooks = data.data.flatMap((order) => order.books);
+        setBooks(extractedBooks);
+      }
+    } catch (error) {
+      console.error("Error fetching best-selling books:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
     fetchDiscountedBooks();
-  }, []);
-  useEffect(() => {
-    const fetchBestSellingBooks = async () => {
-      try {
-        const userId = localStorage.getItem("user_id");
-        const response = await fetch(Base_url+`getBestSellingBooks?user_id=${userId}`);
-        const data = await response.json();
-
-        if (data.status && data.data) {
-          // Extract books from multiple users
-          const extractedBooks = data.data.flatMap((order) => order.books);
-          setBooks(extractedBooks);
-        }
-      } catch (error) {
-        console.error("Error fetching best-selling books:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchBestSellingBooks();
   }, []);
 
@@ -1011,7 +1008,15 @@ const handleAddToCart = async (product) => {
                 <h2 className="font-semibold mt-2 truncate w-full">{book.title}</h2>
                 <div className="flex items-center justify-between mt-2">
                   <span className="text-lg font-bold text-black">₹{book.price}</span>
-                </div>
+                  <span className="text-orange-400 line-through text-sm">{book.mrp}</span>
+                    </div>
+                    {book.discount && (
+                      <div className="flex items-center justify-between mt-1">
+                        <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                          {book.discount}
+                        </span>
+                      </div>
+                    )}
                 <div className="flex justify-end items-center mt-2">
                   <button
                   disabled={book?.is_in_cart}
