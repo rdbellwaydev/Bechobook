@@ -23,7 +23,7 @@ const Nav = () => {
   const [isSearchVisible, setIsSearchVisible] = useState(false);
   const navigate = useNavigate();
   const sidebarRef = useRef(null);
-
+  const token = localStorage.getItem("authtoken");
   // Close sidebar when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -170,7 +170,15 @@ const Nav = () => {
         </div>
         <div className="flex gap-4 items-center">
           <i className="ri-search-line text-white text-2xl cursor-pointer" onClick={() => setIsSearchVisible(!isSearchVisible)}></i>
-          <Link to="/login" className="text-white text-2xl"><i className="ri-user-line"></i></Link>
+          {token ? <>
+            <Link to="/profile" className="text-white text-2xl"><i className="ri-user-line"></i></Link>
+          </>
+        :
+        <>
+         <Link to="/login" className="text-white text-2xl"><i className="ri-user-line"></i></Link>
+        </>  
+        }
+          
           <Link to="/cart" className="text-white text-2xl"><i className="ri-shopping-cart-line"></i></Link>
         </div>
       </div>
@@ -184,6 +192,7 @@ const Nav = () => {
             placeholder="Search Here"
             value={query}
             onChange={handleInputChange}
+            onKeyDown={handleKeyDown}
             onFocus={() => setShowDropdown(visibleResults.length > 0)}
           />
           {showDropdown && visibleResults.length > 0 && (
@@ -359,7 +368,7 @@ const Nav = () => {
                   <li
                     key={index}
                     className="flex items-center gap-2 p-2 hover:bg-gray-200 cursor-pointer"
-
+               
                     onMouseDown={() => handleResultClick(book)}
                   >
                     <img

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import "remixicon/fonts/remixicon.css";
 import Header from "../components/Header/Header";
 import Nav from "../components/Header/Nav";
@@ -34,6 +34,7 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { Base_url } from "../components/ApiController/ApiController";
 import bookError  from '../assets/bookError.png'
+import { HashLoader } from "react-spinners";
 const Home = () => {
   const navigate = useNavigate();
   const cardDetails = [
@@ -135,6 +136,7 @@ const Home = () => {
   const [rightBanner, setRightBanner] = useState(null);
   const { authToken } = useAuth();
   const { cartItems, setCartItems } = useCart();
+  const scrollPositionRef = useRef(0)
   const categoryMap = {
     "Featured Products": "featured",
     "New Arrivals": "new_arrivals",
@@ -445,7 +447,7 @@ const handleAddToCart = async (product) => {
       const data = await response.json();
   
       if (data.status) {
-      
+        scrollPositionRef.current = window.scrollY; // Save current scroll
         fetchBooks();
         fetchDiscountedBooks();
         fetchBestSellingBooks();
@@ -469,7 +471,11 @@ const handleAddToCart = async (product) => {
       });
     }
   };
- 
+  useEffect(() => {
+    if (!loading) {
+      window.scrollTo(0, scrollPositionRef.current);
+    }
+  }, [loading]);
   const fetchDiscountedBooks = async () => {
     try {
       const userId = localStorage.getItem("user_id");
@@ -527,7 +533,13 @@ const handleAddToCart = async (product) => {
     setVisibleCount(products1.length); // Show all remaining products
   };
   const [isOpen, setIsOpen] = useState(false);
-  
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <HashLoader color="#4A90E2" size={80} />
+      </div>
+    );
+  }
   return (
     <div className="w-screen h-full">
       <Header />

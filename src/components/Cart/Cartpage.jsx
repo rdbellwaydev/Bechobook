@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from "axios";
 import Header from '../Header/Header';
 import Nav from '../Header/Nav';
@@ -22,7 +22,7 @@ const ProductGrid = () => {
   const [totalPages, setTotalPages] = useState(1); // Track total pages
   const [totalPrice, setTotalPrice] = useState(0);
   const [totalBooks, setTotalBooks] = useState(0);
-
+  const scrollPositionRef = useRef(0);
   // Fetch cart data with pagination
   const fetchCartData = async () => {
     if (!authToken) {
@@ -88,13 +88,14 @@ const ProductGrid = () => {
   const calculateTotalPrice = (items) => {
     return items.reduce((acc, item) => acc + item.price * item.quantity, 0);
   };
-
+  let lastScrollTop = 0;
   // Handle quantity change for a product
   const handleQuantityChange = async (productId, change) => {
     // Update quantity in paginated cartItems
     const currentItem = cartItems.find((item) => item.id === productId);
     if (!currentItem) return;
-
+    scrollPositionRef.current = window.scrollY; // Save current scroll
+    console.log("In function ",scrollPositionRef.current)
     const newQuantity = currentItem.quantity + change;
     const unitPrice = currentItem.price / currentItem.quantity;
 
@@ -145,7 +146,13 @@ const ProductGrid = () => {
       console.error("Error updating cart:", error);
     }
   };
-
+  useEffect(() => {
+    if (!loading) {
+      console.log("Use Effect ",scrollPositionRef.current)
+      window.scrollTo(0, scrollPositionRef.current);
+    }
+  }, [loading]);
+  
   // Handle checkout using the full payload (cartItemPayload) instead of paginated cartItems
   const handleCheckout = async () => {
     if (cartItemPayload.length === 0) {

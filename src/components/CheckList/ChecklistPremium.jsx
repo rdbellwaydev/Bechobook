@@ -211,7 +211,7 @@ const CheckList = () => {
         <p className="p-4 text-center">No books available</p>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 p-8">
-          {books.map(({ book, price, mrp }) => (
+          {books.map(({ book, price, mrp,quantity }) => (
             <div
               key={book.isbn13}
               className="bg-white border border-gray-200 shadow-lg rounded-lg p-2 flex flex-col items-center transition-transform transform hover:scale-105 w-full sm:w-48"
@@ -238,7 +238,7 @@ const CheckList = () => {
               </p>
               <div className="mt-1 text-xs sm:text-sm text-gray-700 text-center">
   <span className="font-medium text-gray-500">Quantity you'll get: </span>
-  <span className="font-semibold text-blue-600">{bookItem.quantity}</span>
+  <span className="font-semibold text-blue-600">{quantity}</span>
 </div>
               <div className="flex items-center justify-center mt-1">
                 <span className="text-base sm:text-lg font-bold text-green-600">₹{price || "N/A"}</span>

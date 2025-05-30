@@ -5,11 +5,14 @@ import Footer from '../components/Footer/Footer'
 import { useState } from 'react';
 import Pagination from '../components/Pagination/Pagination';
 import ApiService from '../components/ApiController/ApiController';
+import { TbUserQuestion } from 'react-icons/tb';
+import { useNavigate } from 'react-router-dom';
 
 export default function MyOrders() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [orders, setOrders] = useState([]);
+    const navigate = useNavigate();
     const GetOrders = (page)=>{
         ApiService.GetOrders({
           page
@@ -31,7 +34,9 @@ export default function MyOrders() {
       useEffect((currentPage)=>{
         GetOrders(currentPage);
       },[currentPage])
-    
+      const handleOrderDetails = (orderId)=>{
+        navigate(`/order-details/${orderId}`);
+      }
   return (
     <div>
       <Header/>
@@ -46,7 +51,7 @@ export default function MyOrders() {
     <p className="text-gray-600 col-span-full">No orders found.</p>
   ) : (
     orders.map((order, index) => (
-      <div key={order.id || index} className="border border-gray-200 rounded-lg p-4 bg-gray-50 shadow-sm">
+      <div key={order.id || index} onClick={()=>handleOrderDetails(order.id)} className="border border-gray-200 rounded-lg p-4 bg-gray-50 shadow-sm">
         <div className="flex justify-between items-center mb-2">
           <span className="text-sm font-medium text-gray-600">Order ID:</span>
           <span className="text-sm font-semibold text-gray-800">#{order.id}</span>

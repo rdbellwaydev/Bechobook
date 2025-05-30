@@ -40,6 +40,7 @@ export const AuthProvider = ({ children }) => {
       } catch (err) {
         navigate('/'); // Redirect to login if token is missing
         localStorage.removeItem('user_id')
+        localStorage.removeItem('authtoken')
       } 
     };
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import Header from "../Header/Header";
 import Nav from "../Header/Nav";
@@ -26,7 +26,7 @@ const CategoryPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedCondition = searchParams.get("condition") || "";
   const currentPage = parseInt(searchParams.get("page") || "1", 10);
-
+  const scrollPositionRef = useRef(0)
   const updateSearchParams = (params) => {
     const newParams = new URLSearchParams(searchParams);
     Object.entries(params).forEach(([key, value]) => {
@@ -113,7 +113,8 @@ const CategoryPage = () => {
       const data = await response.json();
 
       if (data.status) {
-      
+        scrollPositionRef.current = window.scrollY; // Save current scroll
+    
         fetchBooks();
         setCartItems((prevItems) => [
           ...prevItems,
@@ -134,7 +135,11 @@ const CategoryPage = () => {
       });
     }
   };
-
+  useEffect(() => {
+    if (!loading) {
+      window.scrollTo(0, scrollPositionRef.current);
+    }
+  }, [loading]);
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
