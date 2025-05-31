@@ -35,6 +35,7 @@ import "slick-carousel/slick/slick-theme.css";
 import { Base_url } from "../components/ApiController/ApiController";
 import bookError  from '../assets/bookError.png'
 import { HashLoader } from "react-spinners";
+import './home.css'
 const Home = () => {
   const navigate = useNavigate();
   const cardDetails = [
@@ -564,6 +565,7 @@ const handleAddToCart = async (product) => {
           {...settings}
           slidesToShow={7.2} // More slides in view to reduce gap
           slidesToScroll={1}
+          className="my-slider-class"
         >
           {categories.map((category) => (
             <div key={category.id} className="text-center px-[2px]"> {/* Minimized spacing */}

@@ -1,0 +1,6 @@
+@media (max-width: 768px) {
+    .my-slider-class .slick-prev,
+    .my-slider-class .slick-next {
+      display: none !important;
+    }
+  }
