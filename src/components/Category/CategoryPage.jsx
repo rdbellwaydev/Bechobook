@@ -10,6 +10,7 @@ import { useCart } from "../CartContext";
 import { Base_url } from "../ApiController/ApiController";
 import bookError from '../../assets/bookError.png';
 import Pagination from "../Pagination/Pagination";
+import ThreeDotLoader from "../ThreeDotLoader";
 
 const CategoryPage = () => {
   const { id } = useParams();
@@ -26,6 +27,8 @@ const CategoryPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedCondition = searchParams.get("condition") || "";
   const currentPage = parseInt(searchParams.get("page") || "1", 10);
+  const [loadingBookId, setLoadingBookId] = useState(null);
+
   const scrollPositionRef = useRef(0)
   const updateSearchParams = (params) => {
     const newParams = new URLSearchParams(searchParams);
@@ -99,7 +102,7 @@ const CategoryPage = () => {
       });
       return;
     }
-
+setLoadingBookId(book.id)
     try {
       const response = await fetch(Base_url + "addToCart", {
         method: "POST",
@@ -133,20 +136,22 @@ const CategoryPage = () => {
         title: "Error",
         text: error.message || "Something went wrong. Please try again.",
       });
-    }
+    }finally {
+    setLoadingBookId(null); // ✅ Stop loader after request finishes
+  }
   };
   useEffect(() => {
     if (!loading) {
       window.scrollTo(0, scrollPositionRef.current);
     }
   }, [loading]);
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <HashLoader color="#4A90E2" size={80} />
-      </div>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <div className="flex justify-center items-center min-h-screen">
+  //       <HashLoader color="#4A90E2" size={80} />
+  //     </div>
+  //   );
+  // }
 
   return (
     <>
@@ -215,26 +220,29 @@ const CategoryPage = () => {
                       </span>
                     </div>
                   ) : null}
-                    <div className="flex justify-end items-center mt-2">
-                    <button
-                    disabled={book.is_in_cart}
-  className={`p-2 rounded-full shadow-md border 
-    ${book.is_in_cart ? 'border-yellow-500 text-white bg-yellow-500 cursor-not-allowed' 
-                          : "border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-white"}`}
-  onClick={(e) => {
-    e.stopPropagation();
-    handleAddToCart(book);
-  }}
->
-  <img
-    src="https://cdn-icons-png.flaticon.com/512/1170/1170678.png"
-    alt="Add to Cart"
-    className="w-5 h-5"
-    // style={book.is_in_cart ? { filter: "invert(1)" } : {}}
-  />
-</button>
-
-                    </div>
+<div className="flex justify-end items-center mt-2">
+  <button
+    disabled={book.is_in_cart || loading}
+    className={`p-2 rounded-full shadow-md border flex items-center justify-center
+      ${book.is_in_cart
+        ? 'border-yellow-500 text-white bg-yellow-500 cursor-not-allowed'
+        : 'border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-white'}`}
+    onClick={(e) => {
+      e.stopPropagation();
+      handleAddToCart(book);
+    }}
+  >
+    {loadingBookId === book.id ? (
+      <ThreeDotLoader color="bg-white" size="w-1.5 h-1.5" />
+    ) : (
+      <img
+        src="https://cdn-icons-png.flaticon.com/512/1170/1170678.png"
+        alt="Add to Cart"
+        className="w-5 h-5"
+      />
+    )}
+  </button>
+</div>
                   </div>
                 ))}
               </div>

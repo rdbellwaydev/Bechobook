@@ -9,16 +9,17 @@ import { useAuth } from "../Authentication/AuthContext";
 import { useCart } from "../CartContext";
 import { Base_url } from "../ApiController/ApiController";
 import bookError  from '../../assets/bookError.png'
+import ThreeDotLoader from "../ThreeDotLoader";
 const CatalogBooks = () => {
   const [books, setBooks] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const { authToken } = useAuth();
   const [currentPage, setCurrentPage] = useState(1);
   const { cartItems, setCartItems } = useCart();
   const [totalPages, setTotalPages] = useState(1);
-  
+      const [loadingBookId, setLoadingBookId] = useState(null);
     // const handleAddToCart = async (product) => {
     //    if (!authToken) {
     //      Swal.fire({
@@ -108,9 +109,7 @@ const CatalogBooks = () => {
           return;
         }
     
-        console.log("Fetching cart data...");
-    
-        setLoading(true); // ✅ Set loading before fetching
+        // setLoading(true); // ✅ Set loading before fetching
     
         try {
           const response = await fetch(
@@ -120,23 +119,21 @@ const CatalogBooks = () => {
             }
           );
     
-          console.log("API Response Status:", response.status);
-    
+          
           if (!response.ok) {
             throw new Error("Failed to fetch cart data");
           }
     
           const data = await response.json();
-          console.log("Cart Data:", data); // ✅ Debugging log
+
     
           // ✅ Ensure valid data before updating state
           setCartItems(data.data || []);
-          setTotalPrice(data.total_price ?? 0);
           setTotalPages(data.pagination?.last_page ?? 1);
         } catch (error) {
           console.error("Error fetching cart data:", error);
         } finally {
-          setLoading(false); // ✅ Always stop loading
+          // setLoading(false); // ✅ Always stop loading
         }
       };
     
@@ -170,7 +167,7 @@ const CatalogBooks = () => {
               });
               return;
             }
-          
+          setLoadingBookId(product.id)
             try {
               const response = await fetch(Base_url+"addToCart", {
                 method: "POST",
@@ -184,13 +181,7 @@ const CatalogBooks = () => {
               const data = await response.json();
           
               if (data.status) {
-                Swal.fire({
-                  icon: "success",
-                  title: "Added to Cart",
-                  text: "Book added to cart successfully!",
-                }).then(() => {
-                  // navigate("/cart");
-                });
+                 fetchCatalogBooks();
           
                 // Update the cartItems state with the new item
                 setCartItems((prevItems) => [
@@ -210,29 +201,28 @@ const CatalogBooks = () => {
                 title: "Error",
                 text: error.message || "Something went wrong. Please try again.",
               });
+            }finally{
+              setLoadingBookId(null)
             }
           };
   
   const fetchCatalogBooks = async () => {
     try {
-      setLoading(true);
-      console.log("Fetching books from API...");
-
-      const response = await fetch(Base_url+"getBooksByCatalog?catalogs=most_viewed", {
+      // setLoading(true);
+const userId = localStorage.getItem("user_id");
+      const response = await fetch(Base_url+`getBooksByCatalog?catalogs=most_viewed${userId ? `&user_id=${userId}` : ""}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
       });
 
-      console.log("API Response Status:", response.status);
 
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
       const data = await response.json();
-      console.log("API Response Data:", data);
 
       if (!data.status || !data.data) {
         throw new Error("Invalid data format received.");
@@ -243,7 +233,7 @@ const CatalogBooks = () => {
       console.error("Error fetching catalog books:", error);
       setError(error.message);
     } finally {
-      setLoading(false);
+      // setLoading(false);
     }
   };
 
@@ -285,21 +275,29 @@ const CatalogBooks = () => {
                   <div className="flex items-center justify-between mt-2">
                     <span className="text-lg font-bold text-black">₹{book.price}</span>
                   </div>
-                  <div className="flex justify-end items-center mt-2"> {/* Ensures button stays at the bottom */}
-                      <button
-                        className="bg-white border border-gray-300 p-2 rounded-full shadow-md transition hover:bg-gray-200 flex items-center justify-center"
-                        onClick={(e) => {
-                          e.stopPropagation(); // Prevent navigating to product page
-                          handleAddToCart(book);
-                        }}
-                      >
-                        <img
-                          src="https://cdn-icons-png.flaticon.com/512/1170/1170678.png"
-                          alt="Add to Cart"
-                          className="w-5 h-5 max-sm:w-4 max-sm:h-4"
-                        />
-                      </button>
-                    </div>
+<div className="flex justify-end items-center mt-2">
+  <button
+    disabled={book.is_in_cart || loading}
+    className={`p-2 rounded-full shadow-md border flex items-center justify-center
+      ${book.is_in_cart
+        ? 'border-yellow-500 text-white bg-yellow-500 cursor-not-allowed'
+        : 'border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-white'}`}
+    onClick={(e) => {
+      e.stopPropagation();
+      handleAddToCart(book);
+    }}
+  >
+    {loadingBookId === book.id ? (
+      <ThreeDotLoader color="bg-white" size="w-1.5 h-1.5" />
+    ) : (
+      <img
+        src="https://cdn-icons-png.flaticon.com/512/1170/1170678.png"
+        alt="Add to Cart"
+        className="w-5 h-5"
+      />
+    )}
+  </button>
+</div>
                 </div>
               ))}
             </div>

@@ -24,6 +24,7 @@ import MostViewed from './components/Catalog/MostViewed';
 import MyOrders from './Pages/MyOrders';
 import OrderDetails from './Pages/OrderDetails';
 import SearchResults from './Pages/SearchResults';
+import BulkListing from './Pages/BulkListing';
 const ScrollToTop = () => {
    
   const { pathname } = useLocation();
@@ -69,6 +70,7 @@ const App = () => {
       <Route path="/myorders" element= {<MyOrders/>}/>
       <Route path="/order-details/:orderId" element= {<OrderDetails/>}/>
       <Route path="/search" element= {<SearchResults/>}/>
+      <Route path='/bulk-listing' element={<BulkListing/>}/>
       </Routes>
     </div>
   )

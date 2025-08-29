@@ -275,6 +275,7 @@ const Nav = () => {
             <Link to="/">Home</Link>
 
             <Link to="/about-us">About Us </Link>
+            <Link to="/bulk-listing">Bulk Listing</Link>
             {/* <Link>Catalog <i className="ri-arrow-down-s-line"></i></Link> */}
             <div
               className="relative"
