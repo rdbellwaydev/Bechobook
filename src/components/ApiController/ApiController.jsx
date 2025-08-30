@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const Base_url =   'https://admin.bechobook.com/api/'; //'https://bb.bechobookscan.com/api/';
+export const Base_url =  'https://admin.buybook.store/api/' //'https://admin.bechobook.com/api/'; //'https://bb.bechobookscan.com/api/';
  
 const Api = axios.create({
   baseURL: Base_url,
@@ -30,6 +30,7 @@ Api.interceptors.request.use(config => {
 const ApiService = {
      GetOrders : (params) => Api.get('/GetOrders',{params}),
      orderDetails : (params) => Api.get('/orderDetails',{params}),
+     bulkListing : (params) => Api.get('/bulkListingBooks',{params})
 };
 
 export default ApiService;

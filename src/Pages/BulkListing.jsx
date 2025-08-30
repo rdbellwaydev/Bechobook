@@ -2,29 +2,58 @@ import React, { useState, useEffect } from "react";
 import Header from "../components/Header/Header";
 import Nav from "../components/Header/Nav";
 import Footer from "../components/Footer/Footer";
+import ApiService, { Base_url } from "../components/ApiController/ApiController";
 
-// Dummy Data (Replace with API response)
-const dummyBooks = [
-  { id: 1, title: "Book 1", price: 200, category: "Fiction", condition: "New", image: "https://via.placeholder.com/150" },
-  { id: 2, title: "Book 2", price: 150, category: "Education", condition: "Used", image: "https://via.placeholder.com/150" },
-  { id: 3, title: "Book 3", price: 500, category: "Fiction", condition: "New", image: "https://via.placeholder.com/150" },
-  { id: 4, title: "Book 4", price: 300, category: "Science", condition: "New", image: "https://via.placeholder.com/150" },
-];
 
 export default function BulkListing() {
   const [books, setBooks] = useState([]);
   const [quantities, setQuantities] = useState({});
   const [selectedBooks, setSelectedBooks] = useState([]);
-
+const [maxPrice, setMaxPrice] = useState(1000);
   // Filters
   const [conditionFilter, setConditionFilter] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [priceRange, setPriceRange] = useState(1000);
+  const [categories, setCategories] = useState([]);
+  const [conditions, setConditions] = useState([]);
 
+  const fetchbulkbooks =() =>{
+    ApiService.bulkListing().then((response)=>{
+      if(response.data.status === true){
+         setBooks(response.data.data.data);
+         setPriceRange(parseInt(response.data.highest_price))
+         setMaxPrice(parseInt(response.data.highest_price))
+      }
+    })
+  }
+ const fetchCategories = async () => {
+      try {
+        const response = await fetch(Base_url+"getCategory");
+        const data = await response.json();
+        if (data.status) {
+          setCategories(data.data); // Set categories
+        }
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+ const fetchConditions = async () => {
+      try {
+        const response = await fetch(Base_url+"getCondition");
+        const data = await response.json();
+        if (data.status) {
+          setConditions(data.data); // Set categories
+        }
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
   useEffect(() => {
     // API call simulation
-    setBooks(dummyBooks);
-    setQuantities(dummyBooks.reduce((acc, book) => ({ ...acc, [book.id]: 1 }), {}));
+    fetchCategories()
+    fetchConditions()
+fetchbulkbooks()
+    setQuantities(books.reduce((acc, book) => ({ ...acc, [book.id]: 1 }), {}));
   }, []);
 
   const handleQuantityChange = (id, change) => {
@@ -48,7 +77,10 @@ export default function BulkListing() {
   );
 
   const handleAddSelectedToCart = () => {
-    const booksToAdd = books.filter((book) => selectedBooks.includes(book.id));
+    const booksToAdd = books.filter((book) => selectedBooks.includes(book.id)).map((book)=>({
+           ...book,
+           quantity : quantities[book.id] || 1
+    }));
     console.log("Books to add to cart:", booksToAdd);
     alert("Books added to cart!");
   };
@@ -58,7 +90,28 @@ export default function BulkListing() {
      <Header />
       <Nav />
     <div className="p-6 min-h-screen">
-      <h2 className="text-3xl font-bold mb-6 text-black">Bulk Book Listing</h2>
+     {/* Heading Left + Search Bar Center */}
+<div className="relative flex items-center mb-6">
+  {/* Left Heading */}
+  <h2 className="text-3xl font-bold text-black">Bulk Book Listing</h2>
+
+  {/* Centered Search */}
+  <div className="absolute left-1/2 transform -translate-x-1/2 w-full max-w-xs">
+    <input
+      type="text"
+      placeholder="Search books..."
+      onChange={(e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        setBooks(
+          dummyBooks.filter((book) =>
+            book.title.toLowerCase().includes(searchTerm)
+          )
+        );
+      }}
+      className="border border-gray-300 p-2 rounded w-full bg-white text-black"
+    />
+  </div>
+</div>
 
       {/* Filters */}
       <div className="mb-8 grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
@@ -69,9 +122,12 @@ export default function BulkListing() {
             onChange={(e) => setConditionFilter(e.target.value)}
             className="border border-gray-300 p-2 rounded w-full bg-white text-black"
             >
-            <option value="">All</option>
-            <option value="New">New</option>
-            <option value="Used">Used</option>
+           <option value='' selected disabled>Select Condition</option>
+              {conditions.map((condition)=>{
+                return (
+                  <option value={condition.id}>{condition.name}</option>
+                )
+              })}
           </select>
         </div>
 
@@ -82,10 +138,12 @@ export default function BulkListing() {
             onChange={(e) => setCategoryFilter(e.target.value)}
             className="border border-gray-300 p-2 rounded w-full bg-white text-black"
             >
-            <option value="">All</option>
-            <option value="Fiction">Fiction</option>
-            <option value="Education">Education</option>
-            <option value="Science">Science</option>
+              <option value='' selected disabled>Select Category</option>
+              {categories.map((category)=>{
+                return (
+                  <option value={category.id}>{category.name}</option>
+                )
+              })}
           </select>
         </div>
 
@@ -94,7 +152,7 @@ export default function BulkListing() {
           <input
             type="range"
             min="0"
-            max="1000"
+            max={maxPrice}
             value={priceRange}
             onChange={(e) => setPriceRange(Number(e.target.value))}
             className="w-full accent-black"
@@ -120,14 +178,20 @@ export default function BulkListing() {
 >
   <div className="relative w-full pb-[100%] mb-4 overflow-hidden rounded-lg">
     <img
-      src={book.image}
-      alt={book.title}
+      src={book?.book?.image}
+      alt={book?.book?.title_long}
       className="absolute inset-0 w-full h-full object-cover hover:scale-105 transition-transform"
     />
   </div>
-  <h3 className="font-semibold text-lg text-black truncate">{book.title}</h3>
+  <h3 className="font-semibold text-lg text-black truncate">{book?.book?.title_long}</h3>
   <p className="text-gray-600 text-sm">
-    {book.category} • {book.condition}
+    {book.category_name} • {book.condition_name}
+  </p>
+  <p className="text-gray-600 text-sm">
+    {book?.book?.synopsis.length > 20 ? book?.book?.synopsis.substring(0, 50) + '...' : book?.book?.synopsis}
+  </p>
+  <p className="text-gray-600 text-sm">
+    Stock : {book?.stocks}
   </p>
   <p className="text-black font-bold mt-1">₹{book.price}</p>
 
