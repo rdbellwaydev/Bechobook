@@ -3,27 +3,42 @@ import Header from "../components/Header/Header";
 import Nav from "../components/Header/Nav";
 import Footer from "../components/Footer/Footer";
 import ApiService, { Base_url } from "../components/ApiController/ApiController";
+import { FaBookOpen, FaInfoCircle } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import useDebounce from "../components/Debounce";
 
 
 export default function BulkListing() {
   const [books, setBooks] = useState([]);
   const [quantities, setQuantities] = useState({});
   const [selectedBooks, setSelectedBooks] = useState([]);
+  const navigate = useNavigate();
 const [maxPrice, setMaxPrice] = useState(1000);
+  const [searchTerm, setSearchTerm] = useState("");
   // Filters
   const [conditionFilter, setConditionFilter] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [priceRange, setPriceRange] = useState(1000);
   const [categories, setCategories] = useState([]);
   const [conditions, setConditions] = useState([]);
-
-  const fetchbulkbooks =() =>{
-    ApiService.bulkListing().then((response)=>{
+const debouncedSearchTerm = useDebounce(searchTerm, 500);
+const debouncedPriceRange = useDebounce(priceRange, 500);
+  const fetchbulkbooks =(filters) =>{
+    ApiService.bulkListing({
+    condition_id: filters.conditionFilter || "",
+    category_id: filters.categoryFilter || "",
+    price_range: filters.priceRange || maxPrice,
+    search: filters.searchTerm || ""
+    }).then((response)=>{
       if(response.data.status === true){
          setBooks(response.data.data.data);
          setPriceRange(parseInt(response.data.highest_price))
          setMaxPrice(parseInt(response.data.highest_price))
+      }else{
+        setBooks([]);
       }
+    }).catch((error)=>{
+      setBooks([]);
     })
   }
  const fetchCategories = async () => {
@@ -48,13 +63,37 @@ const [maxPrice, setMaxPrice] = useState(1000);
         console.error("Error fetching categories:", error);
       }
     };
-  useEffect(() => {
-    // API call simulation
-    fetchCategories()
-    fetchConditions()
-fetchbulkbooks()
-    setQuantities(books.reduce((acc, book) => ({ ...acc, [book.id]: 1 }), {}));
-  }, []);
+// Load from localStorage and fetch data once
+useEffect(() => {
+  const savedFilters = JSON.parse(localStorage.getItem("bulkListingFilters")) || {};
+  const savedCart = JSON.parse(localStorage.getItem("bulkListingCart")) || {};
+
+  if (savedFilters) {
+    setConditionFilter(savedFilters.conditionFilter || "");
+    setCategoryFilter(savedFilters.categoryFilter || "");
+    setPriceRange(savedFilters.priceRange || maxPrice);
+  }
+
+  if (savedCart) {
+    setSelectedBooks(savedCart.selectedBooks || []);
+    setQuantities(savedCart.quantities || {});
+  }
+
+  fetchCategories();
+  fetchConditions();
+
+  fetchbulkbooks({
+    ...savedFilters,
+    ...savedCart
+  });
+}, []); 
+useEffect(() => {
+  if (conditionFilter || categoryFilter || debouncedPriceRange || debouncedSearchTerm) {
+    fetchbulkbooks({ conditionFilter, categoryFilter, priceRange:debouncedPriceRange, searchTerm:debouncedSearchTerm });
+  }
+}, [conditionFilter, categoryFilter, debouncedPriceRange, debouncedSearchTerm]);
+
+
 
   const handleQuantityChange = (id, change) => {
     setQuantities((prev) => ({
@@ -69,13 +108,6 @@ fetchbulkbooks()
     );
   };
 
-  const filteredBooks = books.filter(
-    (book) =>
-      (!conditionFilter || book.condition === conditionFilter) &&
-      (!categoryFilter || book.category === categoryFilter) &&
-      book.price <= priceRange
-  );
-
   const handleAddSelectedToCart = () => {
     const booksToAdd = books.filter((book) => selectedBooks.includes(book.id)).map((book)=>({
            ...book,
@@ -84,6 +116,20 @@ fetchbulkbooks()
     console.log("Books to add to cart:", booksToAdd);
     alert("Books added to cart!");
   };
+useEffect(() => {
+  localStorage.setItem("bulkListingFilters", JSON.stringify({
+    conditionFilter,
+    categoryFilter,
+    priceRange
+  }));
+}, [conditionFilter, categoryFilter, priceRange]);
+
+useEffect(() => {
+  localStorage.setItem("bulkListingCart", JSON.stringify({
+    selectedBooks,
+    quantities
+  }));
+}, [selectedBooks, quantities]);
 
   return (
     <>
@@ -100,14 +146,8 @@ fetchbulkbooks()
     <input
       type="text"
       placeholder="Search books..."
-      onChange={(e) => {
-        const searchTerm = e.target.value.toLowerCase();
-        setBooks(
-          dummyBooks.filter((book) =>
-            book.title.toLowerCase().includes(searchTerm)
-          )
-        );
-      }}
+       value={searchTerm}
+       onChange={(e) => setSearchTerm(e.target.value)}
       className="border border-gray-300 p-2 rounded w-full bg-white text-black"
     />
   </div>
@@ -168,8 +208,8 @@ fetchbulkbooks()
       </div>
 
       {/* Book List */}
-     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 p-6">
-        {filteredBooks.map((book) => (
+      {books.length > 0 ? ( <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 p-6">
+        {books.map((book) => (
 <div
   key={book.id}
   onClick={() => handleSelectBook(book.id)}
@@ -195,8 +235,10 @@ fetchbulkbooks()
   </p>
   <p className="text-black font-bold mt-1">₹{book.price}</p>
 
-  {/* Quantity Selector */}
-  <div className="flex items-center gap-2 mt-3">
+{/* Quantity Selector + Info Button */}
+<div className="flex items-center justify-between mt-3">
+  {/* Quantity Control */}
+  <div className="flex items-center gap-2">
     <button
       onClick={(e) => {
         e.stopPropagation();
@@ -206,7 +248,9 @@ fetchbulkbooks()
     >
       -
     </button>
+
     <span>{quantities[book.id]}</span>
+
     <button
       onClick={(e) => {
         e.stopPropagation();
@@ -217,10 +261,27 @@ fetchbulkbooks()
       +
     </button>
   </div>
+
+  {/* Info Button */}
+  <button
+    onClick={(e) => {
+     navigate(`/product/${book.id}`);
+    }}
+    className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300 text-black shadow"
+    title="View Details"
+  >
+    <FaInfoCircle />
+  </button>
+</div>
 </div>
 
         ))}
-      </div>
+      </div>) : (<div className="flex flex-col items-center justify-center h-64 text-center">
+    <FaBookOpen className="text-gray-400 text-5xl mb-3" />
+    <p className="text-gray-500 text-lg font-medium">No books found</p>
+    <p className="text-gray-400 text-sm">Try adjusting your search or filters</p>
+  </div>) }
+    
     </div>
      <Footer />
         </>
