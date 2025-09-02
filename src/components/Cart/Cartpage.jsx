@@ -10,7 +10,8 @@ import HashLoader from "react-spinners/HashLoader";
 import { Base_url } from '../ApiController/ApiController';
 import Pagination from '../Pagination/Pagination';
 import bookError from '../../assets/bookError.png'
-
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 const ProductGrid = () => {
   const { authToken } = useAuth();
   const navigate = useNavigate();
@@ -257,7 +258,41 @@ const ProductGrid = () => {
       </>
     );
   }
+const exportToExcel = () => {
+  if (!cartItems.length) {
+    Swal.fire({
+      icon: "info",
+      title: "No Data",
+      text: "Cart is empty, nothing to export!",
+      toast: true,
+      position: "top-end",
+      timer: 2000,
+      showConfirmButton: false
+    });
+    return;
+  }
 
+  // Prepare data for Excel
+  const excelData = cartItems.map((item, index) => ({
+    "S.No": index + 1,
+    "Book Title": item.title,
+    "Authors": item.authors,
+    "Quantity": item.quantity,
+    "Price": parseFloat(item.price).toFixed(2),
+    "MSRP": parseFloat(item.msrp).toFixed(2),
+    "Stock": item.stocks
+  }));
+
+  // Create worksheet and workbook
+  const worksheet = XLSX.utils.json_to_sheet(excelData);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Cart");
+
+  // Generate Excel file
+  const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+  const data = new Blob([excelBuffer], { type: "application/octet-stream" });
+  saveAs(data, `Cart_${new Date().toISOString().split("T")[0]}.xlsx`);
+};
   return (
     <>
       <Header />
@@ -303,16 +338,6 @@ const ProductGrid = () => {
           />
         </svg>
       </button>
-
-      {/* Image */}
-      {/* <div className="w-full aspect-[2/3] rounded-md overflow-hidden bg-gray-100">
-        <img
-          src={product.image || bookError}
-          alt={product.title}
-          className="w-full h-full object-cover"
-          loading="lazy"
-        />
-      </div> */}
        <div className="w-full max-w-[160px] mx-auto aspect-[2/3] bg-gray-100 overflow-hidden">
                 <img
                   src={product.image || bookError}

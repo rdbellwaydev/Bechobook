@@ -6,6 +6,7 @@ import ApiService, { Base_url } from "../components/ApiController/ApiController"
 import { FaBookOpen, FaInfoCircle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import useDebounce from "../components/Debounce";
+import Swal from "sweetalert2";
 
 
 export default function BulkListing() {
@@ -32,7 +33,13 @@ const debouncedPriceRange = useDebounce(priceRange, 500);
     }).then((response)=>{
       if(response.data.status === true){
          setBooks(response.data.data.data);
-         setPriceRange(parseInt(response.data.highest_price))
+
+         const initialQuantities = {};
+  response.data.data.data.forEach(book => {
+    initialQuantities[book.id] = quantities[book.id] || 1; // Keep previous if exists
+  });
+  setQuantities(initialQuantities);
+         setPriceRange((prev) => prev || data.highest_price)
          setMaxPrice(parseInt(response.data.highest_price))
       }else{
         setBooks([]);
@@ -71,7 +78,7 @@ useEffect(() => {
   if (savedFilters) {
     setConditionFilter(savedFilters.conditionFilter || "");
     setCategoryFilter(savedFilters.categoryFilter || "");
-    setPriceRange(savedFilters.priceRange || maxPrice);
+    setPriceRange(savedFilters.priceRange || priceRange);
   }
 
   if (savedCart) {
@@ -111,10 +118,74 @@ useEffect(() => {
   const handleAddSelectedToCart = () => {
     const booksToAdd = books.filter((book) => selectedBooks.includes(book.id)).map((book)=>({
            ...book,
+           book_id : book.id,
            quantity : quantities[book.id] || 1
     }));
-    console.log("Books to add to cart:", booksToAdd);
-    alert("Books added to cart!");
+
+  ApiService.bulkAddToCart({ books: booksToAdd })
+  .then((response) => {
+    const { status, added, skipped } = response.data;
+
+    if (status === true) {
+      // ✅ All added
+      Swal.fire({
+        icon: "success",
+        title: "Books Added to Cart",
+        text: `Added: ${added.length}`,
+        showConfirmButton: false,
+        timer: 2000,
+        toast: true,
+        position: "top-end",
+      });
+    } 
+    else if (status === "partial") {
+      // ⚠️ Partial success
+      Swal.fire({
+        icon: "warning",
+        title: "Some Books Skipped",
+        html: `
+          <b>Added:</b> ${added.length}<br>
+          <b>Skipped:</b> ${skipped.length}<br>
+          <b>Reasons:</b> ${skipped.map(item => `${item.title_long}: ${item.reason}`).join(", ")}
+        `,
+        showConfirmButton: false,
+        timer: 4000,
+        toast: true,
+        position: "top-end",
+      });
+    } 
+    else {
+      // ❌ All failed
+      Swal.fire({
+        icon: "error",
+        title: "No Books Added",
+        text: skipped.map(item => `${item.title_long}: ${item.reason}`).join(", "),
+        showConfirmButton: false,
+        timer: 3000,
+        toast: true,
+        position: "top-end",
+      });
+    }
+
+    // Reset cart state if at least one item was added
+    if (added.length > 0) {
+      localStorage.removeItem("bulkListingCart");
+      setSelectedBooks([]);
+      setQuantities({});
+    }
+  })
+  .catch((error) => {
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: error.response?.data?.message || "Something went wrong",
+      showConfirmButton: false,
+      timer: 2000,
+      toast: true,
+      position: "top-end",
+    });
+  });
+
   };
 useEffect(() => {
   localStorage.setItem("bulkListingFilters", JSON.stringify({
@@ -203,7 +274,7 @@ useEffect(() => {
           onClick={handleAddSelectedToCart}
           className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800 transition"
           >
-          Add Selected to Cart
+          Add to Cart
         </button>
       </div>
 
@@ -249,7 +320,7 @@ useEffect(() => {
       -
     </button>
 
-    <span>{quantities[book.id]}</span>
+    <span>{quantities[book.id] || 1}</span>
 
     <button
       onClick={(e) => {

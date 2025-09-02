@@ -30,7 +30,8 @@ Api.interceptors.request.use(config => {
 const ApiService = {
      GetOrders : (params) => Api.get('/GetOrders',{params}),
      orderDetails : (params) => Api.get('/orderDetails',{params}),
-     bulkListing : (params) => Api.get('/bulkListingBooks',{params})
+     bulkListing : (params) => Api.get('/bulkListingBooks',{params}),
+     bulkAddToCart : (data) => Api.post('/bulkAddToCart',data),
 };
 
 export default ApiService;
