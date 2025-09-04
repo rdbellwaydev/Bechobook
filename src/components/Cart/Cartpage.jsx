@@ -259,7 +259,7 @@ const ProductGrid = () => {
     );
   }
 const exportToExcel = () => {
-  if (!cartItems.length) {
+  if (!cartItemPayload.length) {
     Swal.fire({
       icon: "info",
       title: "No Data",
@@ -272,8 +272,7 @@ const exportToExcel = () => {
     return;
   }
 
-  // Prepare data for Excel
-  const excelData = cartItems.map((item, index) => ({
+  const excelData = cartItemPayload.map((item, index) => ({
     "S.No": index + 1,
     "Book Title": item.title,
     "Authors": item.authors,
@@ -283,12 +282,11 @@ const exportToExcel = () => {
     "Stock": item.stocks
   }));
 
-  // Create worksheet and workbook
+
   const worksheet = XLSX.utils.json_to_sheet(excelData);
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, "Cart");
 
-  // Generate Excel file
   const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
   const data = new Blob([excelBuffer], { type: "application/octet-stream" });
   saveAs(data, `Cart_${new Date().toISOString().split("T")[0]}.xlsx`);
@@ -298,19 +296,33 @@ const exportToExcel = () => {
       <Header />
       <Nav />
       <div className="p-4 bg-gray-50">
-        <div className="p-6 bg-gray-100 mb-6">
+        <div className="p-6 bg-gray-100 mb-6 flex flex-col md:flex-row md:items-center md:justify-between rounded-lg shadow">
+          <div className='flex flex-col mb-4 md:mb-0'>
+
           <h2 className="text-2xl font-bold text-gray-800 mb-4">Total Books: {totalBooks}</h2>
-          <div className="flex flex-wrap gap-4">
+          <div className="flex flex-wrap  gap-4">
             {Object.entries(categoryCount).map(([category, count]) => (
               <div
-                key={category}
-                className="bg-[#282828] text-white py-2 px-2 rounded-lg shadow-lg transform transition duration-300 hover:scale-105 hover:shadow-xl"
+              key={category}
+              className="bg-[#282828] text-white py-2 px-2 rounded-lg shadow-lg transform transition duration-300 hover:scale-105 hover:shadow-xl"
               >
                 <span className="font-bold">{category}:</span> {count} books
               </div>
             ))}
+            </div>
+            
           </div>
+          <div className="flex justify-end mb-4">
+  <button
+    onClick={exportToExcel}
+    className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
+  >
+    Export to Excel
+  </button>
+</div>
+
         </div>
+        
         {/* Product Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 px-2">
   {cartItems.map((product) => (
