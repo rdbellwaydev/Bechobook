@@ -220,7 +220,7 @@ const Nav = () => {
         <ul className="flex flex-col gap-4 p-4">
           <Link to="/" className="py-2 border-b">Home</Link>
           <Link to="/wishlist" className="py-2 border-b">Wishlist</Link>
-
+<Link to="/bulk-listing">Bulk Listing</Link>
           <Link to="/about-us" className="py-2 border-b">About Us</Link>
 
           {/* Catalogs with Dropdown */}

@@ -206,9 +206,8 @@ const booksToAdd = Allbooks
   })
   .catch((error) => {
     Swal.fire({
-      icon: "error",
-      title: "Error",
-      text: error.response?.data?.message || "Something went wrong",
+      icon: "warning",
+      text: "Please Select Book",
       showConfirmButton: false,
       timer: 2000,
       toast: true,
