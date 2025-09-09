@@ -3,7 +3,7 @@ import Header from "../components/Header/Header";
 import Nav from "../components/Header/Nav";
 import Footer from "../components/Footer/Footer";
 import ApiService, { Base_url } from "../components/ApiController/ApiController";
-import { FaBookOpen, FaInfoCircle } from "react-icons/fa";
+import { FaBookOpen, FaInfoCircle, FaShoppingCart } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import useDebounce from "../components/Debounce";
 import Swal from "sweetalert2";
@@ -11,6 +11,7 @@ import Swal from "sweetalert2";
 
 export default function BulkListing() {
   const [books, setBooks] = useState([]);
+  const [Allbooks, setAllBooks] = useState([]);
   const [quantities, setQuantities] = useState({});
   const [selectedBooks, setSelectedBooks] = useState([]);
   const navigate = useNavigate();
@@ -24,17 +25,33 @@ const [maxPrice, setMaxPrice] = useState(1000);
   const [conditions, setConditions] = useState([]);
 const debouncedSearchTerm = useDebounce(searchTerm, 500);
 const debouncedPriceRange = useDebounce(priceRange, 500);
+
+const fetchAllbooks = ()=>{
+    ApiService.bulkListing({pagination:false}).then((response)=>{
+      if(response.data.status === true){
+         setAllBooks(response.data.data);
+    
+      }else{
+        setAllBooks([]);
+      }
+    }).catch((error)=>{
+      setAllBooks([]);
+    })
+}
   const fetchbulkbooks =(filters) =>{
+     const userId = localStorage.getItem("user_id");
     ApiService.bulkListing({
     condition_id: filters.conditionFilter || "",
     category_id: filters.categoryFilter || "",
     price_range: filters.priceRange || maxPrice,
-    search: filters.searchTerm || ""
+    search: filters.searchTerm || "",
+    pagination:true,
+    user_id : userId || "" 
     }).then((response)=>{
       if(response.data.status === true){
          setBooks(response.data.data.data);
 
-         const initialQuantities = {};
+         const initialQuantities = { ...quantities };
   response.data.data.data.forEach(book => {
     initialQuantities[book.id] = quantities[book.id] || 1; // Keep previous if exists
   });
@@ -88,7 +105,7 @@ useEffect(() => {
 
   fetchCategories();
   fetchConditions();
-
+  fetchAllbooks();
   fetchbulkbooks({
     ...savedFilters,
     ...savedCart
@@ -103,9 +120,12 @@ useEffect(() => {
 
 
   const handleQuantityChange = (id, change) => {
+    const book = books.find((book)=>  book.id === id);
+    const maxstock = parseInt(book?.stocks) || 0;
+    console.log(maxstock)
     setQuantities((prev) => ({
       ...prev,
-      [id]: Math.max(1, (prev[id] || 1) + change),
+      [id]: Math.min(maxstock,Math.max(1, (prev[id] || 1) + change)),
     }));
   };
 
@@ -116,12 +136,22 @@ useEffect(() => {
   };
 
   const handleAddSelectedToCart = () => {
-    const booksToAdd = books.filter((book) => selectedBooks.includes(book.id)).map((book)=>({
-           ...book,
-           book_id : book.id,
-           quantity : quantities[book.id] || 1
-    }));
+    // const booksToAdd = books.filter((book) => selectedBooks.includes(book.id)).map((book)=>({
+    //        ...book,
+    //        book_id : book.id,
+    //        quantity : quantities[book.id] || 1
+    // }));
+const cart = JSON.parse(localStorage.getItem('bulkListingCart')) || { selectedBooks: [], quantities: {} };
 
+console.log(cart.selectedBooks)
+const booksToAdd = Allbooks
+    .filter((book) => cart.selectedBooks.includes(book.id))
+    .map((book) => ({
+        ...book,
+        book_id: book.id,
+        quantity: cart.quantities[book.id] || 1
+    }));
+    
   ApiService.bulkAddToCart({ books: booksToAdd })
   .then((response) => {
     const { status, added, skipped } = response.data;
@@ -293,6 +323,14 @@ useEffect(() => {
       alt={book?.book?.title_long}
       className="absolute inset-0 w-full h-full object-cover hover:scale-105 transition-transform"
     />
+       {book.is_in_cart && (
+      <div
+        className="absolute top-2 right-2 bg-yellow-400 p-2 rounded-full shadow border border-yellow-500"
+        title="Already in Cart"
+      >
+        <FaShoppingCart className="text-black text-sm" />
+      </div>
+    )}
   </div>
   <h3 className="font-semibold text-lg text-black truncate">{book?.book?.title_long}</h3>
   <p className="text-gray-600 text-sm">
