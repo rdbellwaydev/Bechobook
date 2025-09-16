@@ -141,9 +141,21 @@ useEffect(() => {
     //        book_id : book.id,
     //        quantity : quantities[book.id] || 1
     // }));
+    const token = localStorage.getItem("authtoken");
+    if(!token){
+        Swal.fire({
+        icon: "info",
+        title: "Please Login first",
+       showConfirmButton: false,
+      timer: 2000,
+      toast: true,
+      position: "top-end",
+      });
+      return;
+    }
 const cart = JSON.parse(localStorage.getItem('bulkListingCart')) || { selectedBooks: [], quantities: {} };
 
-console.log(cart.selectedBooks)
+
 const booksToAdd = Allbooks
     .filter((book) => cart.selectedBooks.includes(book.id))
     .map((book) => ({

@@ -159,6 +159,7 @@ const ProfilePage = () => {
               className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition duration-300 w-full sm:w-auto"
               onClick={() => {
                 localStorage.removeItem('authtoken'); // Remove token
+                localStorage.removeItem('user_id');
                 setAuthToken(null);
                 navigate('/login'); // Redirect to login
               }}
