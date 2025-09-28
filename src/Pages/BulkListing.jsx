@@ -348,7 +348,7 @@ useEffect(() => {
     {book.category_name} • {book.condition_name}
   </p>
   <p className="text-gray-600 text-sm">
-    {book?.book?.synopsis.length > 20 ? book?.book?.synopsis.substring(0, 50) + '...' : book?.book?.synopsis}
+    {book?.book?.synopsis?.length > 20 ? book?.book?.synopsis?.substring(0, 50) + '...' : book?.book?.synopsis}
   </p>
   <p className="text-gray-600 text-sm">
     Stock : {book?.stocks}
