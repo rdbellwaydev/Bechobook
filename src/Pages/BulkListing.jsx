@@ -249,21 +249,24 @@ useEffect(() => {
       <Nav />
     <div className="p-6 min-h-screen">
      {/* Heading Left + Search Bar Center */}
-<div className="relative flex items-center mb-6">
+<div className="relative flex flex-col md:flex-row md:items-center md:justify-between mb-6">
   {/* Left Heading */}
-  <h2 className="text-3xl font-bold text-black">Bulk Book Listing</h2>
+  <h2 className="text-3xl font-bold text-black mb-3 md:mb-0">
+    Bulk Book Listing
+  </h2>
 
-  {/* Centered Search */}
-  <div className="absolute left-1/2 transform -translate-x-1/2 w-full max-w-xs">
+  {/* Search Bar */}
+  <div className="w-full md:max-w-xs">
     <input
       type="text"
       placeholder="Search books..."
-       value={searchTerm}
-       onChange={(e) => setSearchTerm(e.target.value)}
+      value={searchTerm}
+      onChange={(e) => setSearchTerm(e.target.value)}
       className="border border-gray-300 p-2 rounded w-full bg-white text-black"
     />
   </div>
 </div>
+
 
       {/* Filters */}
       <div className="mb-8 grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
