@@ -275,10 +275,19 @@ const exportToExcel = () => {
   const excelData = cartItemPayload.map((item, index) => ({
     "S.No": index + 1,
     "Book Title": item.title,
-    "Authors": item.authors,
+    "Rack Title": item.rack_title,
     "Quantity": item.quantity,
+    "Publisher": item.publisher,
+    "Authors": item.authors,
+    "Published": item.date_published,
+    "Category": item.category,
+    "MRP": parseFloat(item.msrp).toFixed(2),
     "Price": parseFloat(item.price).toFixed(2),
-    "MSRP": parseFloat(item.msrp).toFixed(2),
+    "Page": item.pages,
+    "Language": item.language,
+    "Condition": item.condition,
+    "ISBN": item.isbn13,
+    "Binding": item.binding,
     "Stock": item.stocks
   }));
 

@@ -7,6 +7,7 @@ import { FaBookOpen, FaInfoCircle, FaShoppingCart } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import useDebounce from "../components/Debounce";
 import Swal from "sweetalert2";
+import Pagination from "../components/Pagination/Pagination";
 
 
 export default function BulkListing() {
@@ -25,7 +26,9 @@ const [maxPrice, setMaxPrice] = useState(1000);
   const [conditions, setConditions] = useState([]);
 const debouncedSearchTerm = useDebounce(searchTerm, 500);
 const debouncedPriceRange = useDebounce(priceRange, 500);
-
+ const [currentPage, setCurrentPage] = useState(1); // Track current page
+  const [totalPages, setTotalPages] = useState(1); // Track total pages
+  const [totalBooks, setTotalBooks] = useState(0);
 const fetchAllbooks = ()=>{
     ApiService.bulkListing({pagination:false}).then((response)=>{
       if(response.data.status === true){
@@ -46,17 +49,19 @@ const fetchAllbooks = ()=>{
     price_range: filters.priceRange || maxPrice,
     search: filters.searchTerm || "",
     pagination:true,
-    user_id : userId || "" 
+    user_id : userId || "",
+    page:currentPage
     }).then((response)=>{
       if(response.data.status === true){
          setBooks(response.data.data.data);
-
+          setTotalBooks(response.data?.data?.total)
+          setTotalPages(response.data?.data?.last_page)
          const initialQuantities = { ...quantities };
   response.data.data.data.forEach(book => {
     initialQuantities[book.id] = quantities[book.id] || 1; // Keep previous if exists
   });
   setQuantities(initialQuantities);
-         setPriceRange((prev) => prev || data.highest_price)
+         setPriceRange(response.data.highest_price)
          setMaxPrice(parseInt(response.data.highest_price))
       }else{
         setBooks([]);
@@ -110,12 +115,12 @@ useEffect(() => {
     ...savedFilters,
     ...savedCart
   });
-}, []); 
+}, [currentPage]); 
 useEffect(() => {
   if (conditionFilter || categoryFilter || debouncedPriceRange || debouncedSearchTerm) {
     fetchbulkbooks({ conditionFilter, categoryFilter, priceRange:debouncedPriceRange, searchTerm:debouncedSearchTerm });
   }
-}, [conditionFilter, categoryFilter, debouncedPriceRange, debouncedSearchTerm]);
+}, [conditionFilter, categoryFilter, debouncedPriceRange, debouncedSearchTerm,currentPage]);
 
 
 
@@ -242,7 +247,9 @@ useEffect(() => {
     quantities
   }));
 }, [selectedBooks, quantities]);
-
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
   return (
     <>
      <Header />
@@ -278,6 +285,7 @@ useEffect(() => {
             className="border border-gray-300 p-2 rounded w-full bg-white text-black"
             >
            <option value='' selected disabled>Select Condition</option>
+           <option value=''>Select All Condition</option>
               {conditions.map((condition)=>{
                 return (
                   <option value={condition.id}>{condition.name}</option>
@@ -294,6 +302,7 @@ useEffect(() => {
             className="border border-gray-300 p-2 rounded w-full bg-white text-black"
             >
               <option value='' selected disabled>Select Category</option>
+                       <option value=''>Select All Category</option>
               {categories.map((category)=>{
                 return (
                   <option value={category.id}>{category.name}</option>
@@ -405,6 +414,17 @@ useEffect(() => {
     <p className="text-gray-400 text-sm">Try adjusting your search or filters</p>
   </div>) }
     
+{books.length > 0 && (
+
+
+        <div className="flex justify-center mt-6">
+          <Pagination
+            totalPages={totalPages}
+            currentPage={currentPage}
+            goToPage={handlePageChange}
+          />
+        </div>
+        )}
     </div>
      <Footer />
         </>

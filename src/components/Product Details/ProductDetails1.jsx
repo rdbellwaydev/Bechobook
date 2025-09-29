@@ -11,6 +11,7 @@ import Swal from "sweetalert2";
 import { Base_url } from "../ApiController/ApiController";
 import bookError  from '../../assets/bookError.png';
 import axios from "axios";
+import ThreeDotLoader from "../ThreeDotLoader";
 const InnerBooks = () => {
   const { id } = useParams(); // Get dynamic ID from the URL
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ const InnerBooks = () => {
   const [visibleCount, setVisibleCount] = useState(16); // Initially show 10 products
   const [quantity, setQuantity] = useState(1);
   const [IsInCart, setIsInCart] = useState(false);
+    const [loadingBookId, setLoadingBookId] = useState(null);
 const { cartItems, setCartItems } = useCart();
   const handleQuantityChange = (change) => {
     const newQuantity = quantity + change;
@@ -60,21 +62,21 @@ const { cartItems, setCartItems } = useCart();
     }
   }, [id]); // Runs whenever the ID or authToken changes
 
-  useEffect(() => {
-    const fetchRelatedProducts = async () => {
-      try {
-        const userId = localStorage.getItem('user_id') || '';
-        const response = await fetch(`${Base_url}getSimilarBooks?book_id=${id}&user_id=${userId}`);
-        const data = await response.json();
-        if (data.status && data.data) {
-          setRelatedProducts(data.data);
-        } else {
-          setRelatedProducts([]);
-        }
-      } catch (error) {
-        console.error("Error fetching related products:", error);
+  const fetchRelatedProducts = async () => {
+    try {
+      const userId = localStorage.getItem('user_id') || '';
+      const response = await fetch(`${Base_url}getSimilarBooks?book_id=${id}&user_id=${userId}`);
+      const data = await response.json();
+      if (data.status && data.data) {
+        setRelatedProducts(data.data);
+      } else {
+        setRelatedProducts([]);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching related products:", error);
+    }
+  };
+  useEffect(() => {
 
     if (id) {
       fetchRelatedProducts();
@@ -109,15 +111,9 @@ const { cartItems, setCartItems } = useCart();
     // Check if the product is already in the cart
     const isProductInCart = cartItems.some((item) => item.book_id === product.id);
   
-    if (isProductInCart) {
-      Swal.fire({
-        icon: "warning",
-        title: "Already in Cart",
-        text: "This book is already in your cart!",
-      });
-      return;
-    }
-  
+
+  setLoadingBookId(product.id)
+  console.log(product)
     try {
       const response = await fetch(Base_url+"addToCart", {
         method: "POST",
@@ -132,6 +128,7 @@ const { cartItems, setCartItems } = useCart();
   
       if (data.status) {
         fetchBookDetails();
+           fetchRelatedProducts();
         // Update the cartItems state with the new item
         setCartItems((prevItems) => [
           ...prevItems,
@@ -150,6 +147,8 @@ const { cartItems, setCartItems } = useCart();
         title: "Error",
         text: error.message || "Something went wrong. Please try again.",
       });
+    }finally{
+       setLoadingBookId(null);
     }
   };
   const handleAddToWishlist = async (product) => {
@@ -392,21 +391,29 @@ const { cartItems, setCartItems } = useCart();
                 </span>
               )}
            
-              <div className="flex justify-end items-center mt-2">
-                <button
-                  className="bg-white border border-gray-300 p-2 rounded-full shadow-md transition hover:bg-gray-200 flex items-center justify-center"
-                  onClick={(e) => {
-                    e.stopPropagation(); // Prevent navigating to product page
-                    handleAddToCart(product);
-                  }}
-                >
-                  <img
-                    src="https://cdn-icons-png.flaticon.com/512/1170/1170678.png"
-                    alt="Add to Cart"
-                    className="w-5 h-5 max-sm:w-4 max-sm:h-4"
-                  />
-                </button>
-              </div>
+             <div className="flex justify-end items-center mt-2">
+  <button
+    disabled={product.is_in_cart || loading}
+    className={`p-2 rounded-full shadow-md border flex items-center justify-center
+      ${product.is_in_cart
+        ? 'border-yellow-500 text-white bg-yellow-500 cursor-not-allowed'
+        : 'border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-white'}`}
+    onClick={(e) => {
+      e.stopPropagation();
+      handleAddToCart(product);
+    }}
+  >
+    {loadingBookId === product.id ? (
+      <ThreeDotLoader color="bg-white" size="w-1.5 h-1.5" />
+    ) : (
+      <img
+        src="https://cdn-icons-png.flaticon.com/512/1170/1170678.png"
+        alt="Add to Cart"
+        className="w-5 h-5"
+      />
+    )}
+  </button>
+</div>
             </div>
           ))}
         </div>
