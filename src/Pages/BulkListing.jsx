@@ -61,8 +61,12 @@ const fetchAllbooks = ()=>{
     initialQuantities[book.id] = quantities[book.id] || 1; // Keep previous if exists
   });
   setQuantities(initialQuantities);
-         setPriceRange(response.data.highest_price)
-         setMaxPrice(parseInt(response.data.highest_price))
+        //  setPriceRange(response.data.highest_price)
+        //  setMaxPrice(parseInt(response.data.highest_price))
+        const highestPrice = parseInt(response.data.highest_price);
+        if (highestPrice && highestPrice !== maxPrice) {
+          setMaxPrice(highestPrice);
+        }
       }else{
         setBooks([]);
       }
