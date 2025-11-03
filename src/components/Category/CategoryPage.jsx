@@ -28,7 +28,8 @@ const CategoryPage = () => {
   const selectedCondition = searchParams.get("condition") || "";
   const currentPage = parseInt(searchParams.get("page") || "1", 10);
   const [loadingBookId, setLoadingBookId] = useState(null);
-
+const [isSortOpen, setIsSortOpen] = useState(false);
+const [sortBy, setSortBy] = useState(searchParams.get("sort") || "");
   const scrollPositionRef = useRef(0)
   const updateSearchParams = (params) => {
     const newParams = new URLSearchParams(searchParams);
@@ -47,7 +48,7 @@ const CategoryPage = () => {
     try {
       const userId = localStorage.getItem("user_id");
       const response = await fetch(
-        `${Base_url}getBooksByCategory?category_id=${id}&page=${currentPage}${selectedCondition ? `&condition_name=${selectedCondition}` : ""}${userId ? `&user_id=${userId}` : ""}`
+        `${Base_url}getBooksByCategory?category_id=${id}&page=${currentPage}${selectedCondition ? `&condition_name=${selectedCondition}` : ""}${sortBy && sortBy !== "Select" ? `&sort=${sortBy}` : ""}${userId ? `&user_id=${userId}` : ""}`
       );
       const data = await response.json();
       if (data.status) {
@@ -152,6 +153,28 @@ setLoadingBookId(book.id)
   //     </div>
   //   );
   // }
+  const handleToggleSort = () => {
+    setIsSortOpen(!isSortOpen);
+  };
+  const handleSortSelection = (option) => {
+  setSortBy(option);
+  setIsSortOpen(false);
+  updateSearchParams({ sort: option, page: 1 });
+  const cleanPrice = (price) =>
+    parseFloat(String(price).replace(/[^\d.]/g, "")) || 0;
+
+  if (option === "low_to_high") {
+    setBooks((prevBooks) =>
+      [...prevBooks].sort((a, b) => cleanPrice(a.price) - cleanPrice(b.price))
+    );
+  } else if (option === "high_to_low") {
+    setBooks((prevBooks) =>
+      [...prevBooks].sort((a, b) => cleanPrice(b.price) - cleanPrice(a.price))
+    );
+  } else {
+    fetchBooks();
+  }
+};
 
   return (
     <>
@@ -168,7 +191,7 @@ setLoadingBookId(book.id)
             <h2 className="text-center text-3xl border-b-4 w-fit mx-auto pb-2 rounded border-lime-600 mb-4">
               {categoryName}
             </h2>
-            <div className="flex justify-end mb-4">
+            <div className="flex gap-4 justify-end mb-4">
   <select
     value={selectedCondition}
     onChange={(e) => {
@@ -180,6 +203,47 @@ setLoadingBookId(book.id)
     <option value="New Book">New Book</option>
     <option value="Old Book">Old Book</option>
   </select>
+            <div className="relative w-full sm:w-64">
+            <div
+              className="flex justify-between items-center cursor-pointer bg-white border rounded px-4 py-2 shadow"
+              onClick={handleToggleSort}
+            >
+              <span className="font-semibold text-gray-700">
+                Sort By : <span className="text-black font-bold">{sortBy === 'low_to_high' ? 'Low To High' : sortBy === 'high_to_low'?'High To Low' : 'Select'}</span>
+              </span>
+              <span className="text-gray-600 text-sm ml-2">
+                {isSortOpen ? "▼" : "▲"}
+              </span>
+            </div>
+
+            {isSortOpen && (
+              <div className="absolute right-0 mt-2 w-full bg-white border rounded shadow-md z-10">
+                <div className="space-y-2 p-2">
+                  <div
+                    className={`cursor-pointer px-2 py-1 rounded ${sortBy === "Select"
+                        ? "bg-blue-100 text-blue-700 font-bold"
+                        : "text-gray-700 hover:bg-gray-200"
+                      }`}
+                    onClick={() => handleSortSelection("Select")}
+                  >
+                    Select
+                  </div>
+                  {["low_to_high", "high_to_low"].map((option, index) => (
+                    <div
+                      key={index}
+                      className={`cursor-pointer px-2 py-1 rounded ${sortBy === option
+                          ? "bg-blue-100 text-blue-700 font-bold"
+                          : "text-gray-700 hover:bg-gray-200"
+                        }`}
+                      onClick={() => handleSortSelection(option)}
+                    >
+                    {option === 'low_to_high' ? 'Low To High' : 'High To Low'}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
 </div>
             </>
           )}
