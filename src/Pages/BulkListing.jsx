@@ -336,12 +336,12 @@ useEffect(() => {
       </div>
 
       {/* Book List */}
-      {books.length > 0 ? ( <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 p-6">
+      {books.length > 0 ? ( <div className="grid grid-cols-2 gap-2 p-2 sm:gap-6 sm:p-6 sm:grid-cols-2 lg:grid-cols-4 ">
         {books.map((book) => (
 <div
   key={book.id}
   onClick={() => handleSelectBook(book.id)}
-  className={`bg-white rounded-xl shadow hover:shadow-lg transition flex flex-col p-4 cursor-pointer border-2 
+  className={`bg-white w-full rounded-xl shadow hover:shadow-lg transition flex flex-col p-4 cursor-pointer border-2 
     ${selectedBooks.includes(book.id) ? "border-black" : "border-transparent"}`}
 >
   <div className="relative w-full pb-[100%] mb-4 overflow-hidden rounded-lg">
@@ -359,17 +359,22 @@ useEffect(() => {
       </div>
     )}
   </div>
-  <h3 className="font-semibold text-lg text-black truncate">{book?.book?.title_long}</h3>
-  <p className="text-gray-600 text-sm">
+  <h3 className="font-semibold text-base sm:text-lg text-black truncate">{book?.book?.title_long}</h3>
+  <p className="text-gray-600 text-xs sm:text-sm">
     {book.category_name} • {book.condition_name}
   </p>
-  <p className="text-gray-600 text-sm">
-    {book?.book?.synopsis?.length > 20 ? book?.book?.synopsis?.substring(0, 50) + '...' : book?.book?.synopsis}
+  <p className="text-gray-600 text-xs sm:text-sm">
+    {/* {book?.book?.synopsis?.length > 20 ? book?.book?.synopsis?.substring(0, 50) + '...' : book?.book?.synopsis} */}
+    {book?.book?.synopsis?.length > 20
+    ? window.innerWidth < 640
+      ? book?.book?.synopsis?.substring(0, 25) + "..."
+      : book?.book?.synopsis?.substring(0, 50) + "..."
+    : book?.book?.synopsis}
   </p>
-  <p className="text-gray-600 text-sm">
+  <p className="text-gray-600 text-xs sm:text-sm">
     Stock : {book?.stocks}
   </p>
-  <p className="text-black font-bold mt-1">₹{book.price}</p>
+  <p className="text-black font-bold mt-1 text-sm sm:text-lg">₹{book.price}</p>
 
 {/* Quantity Selector + Info Button */}
 <div className="flex items-center justify-between mt-3">
@@ -380,7 +385,7 @@ useEffect(() => {
         e.stopPropagation();
         handleQuantityChange(book.id, -1);
       }}
-      className="w-8 h-8 flex items-center justify-center border rounded hover:bg-gray-100"
+      className="w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center border rounded hover:bg-gray-100"
     >
       -
     </button>
@@ -392,7 +397,7 @@ useEffect(() => {
         e.stopPropagation();
         handleQuantityChange(book.id, 1);
       }}
-      className="w-8 h-8 flex items-center justify-center border rounded hover:bg-gray-100"
+      className="w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center border rounded hover:bg-gray-100"
     >
       +
     </button>
@@ -403,7 +408,7 @@ useEffect(() => {
     onClick={(e) => {
      navigate(`/product/${book.id}`);
     }}
-    className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300 text-black shadow"
+    className="w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300 text-black shadow"
     title="View Details"
   >
     <FaInfoCircle />
