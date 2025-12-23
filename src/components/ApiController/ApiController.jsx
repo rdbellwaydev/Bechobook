@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const Base_url =  'https://admin.buybook.store/api/' //'https://admin.bechobook.com/api/'; //'https://bb.bechobookscan.com/api/';
+export const Base_url =  'https://admin.bechobook.in/api/' //'https://admin.bechobook.com/api/'; //'https://bb.bechobookscan.com/api/';
  
 const Api = axios.create({
   baseURL: Base_url,
