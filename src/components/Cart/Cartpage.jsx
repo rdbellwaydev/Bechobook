@@ -306,7 +306,7 @@ const exportToExcel = () => {
       <Nav />
       <div className="p-4 bg-gray-50">
         <div className="p-6 bg-gray-100 mb-6 flex flex-col md:flex-row md:items-center md:justify-between rounded-lg shadow">
-          <div className='flex flex-col mb-4 md:mb-0'>
+          <div className='flex flex-col mb-4 md:mb-0' style={{width:'80%'}}>
 
           <h2 className="text-2xl font-bold text-gray-800 mb-4">Total Books: {totalBooks}</h2>
           <div className="flex flex-wrap  gap-4">
@@ -370,7 +370,7 @@ const exportToExcel = () => {
 
       {/* Title */}
       <h2 className="mt-2 text-sm font-semibold text-center text-gray-800 line-clamp-2">
-        {product.title.length > 40 ? product.title.substring(0, 50) + '...' : product.title}
+        {product?.title?.length > 40 ? product.title.substring(0, 50) + '...' : product.title}
       </h2>
 
       {/* Author */}
